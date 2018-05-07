@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::Read;
 
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
@@ -13,13 +13,13 @@ extern crate structopt;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-fn sample_dict(mut rng: &mut rand::OsRng, dict: &[String], samples: usize) -> Vec<String> {
+fn sample_dict(mut rng: &mut rand::OsRng, dict: &[&str], samples: usize) -> Vec<String> {
     let range = Range::new(0, dict.len());
 
     let mut ret: Vec<String> = Vec::new();
 
     for _ in 0..samples {
-        ret.push(dict[range.ind_sample(&mut rng)].clone());
+        ret.push(dict[range.ind_sample(&mut rng)].to_owned());
     }
 
     ret
@@ -56,29 +56,32 @@ struct Opt {
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
 
-    let mut wordlist: Vec<String> = vec![];
-    if let Some(wl) = opts.wordlist {
-        let inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
-        let inf = BufReader::new(inf);
+    let mut wordlist = String::new();
+    let eff = include_str!("../eff.txt");
 
-        wordlist.extend(inf.lines().map(|x| x.unwrap().to_lowercase()));
+    let mut dict: Vec<&str> = vec![];
+
+    if let Some(wl) = opts.wordlist {
+        let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
+        inf.read_to_string(&mut wordlist)
+            .with_context(|e| format!("{}: {}", &wl.display(), e))?;
+        dict.extend(wordlist.lines());
     } else {
-        let eff = include_str!("../eff.txt");
-        wordlist.extend(eff.lines().map(|x| x.to_lowercase()));
+        dict.extend(eff.lines());
     }
 
-    wordlist.sort_unstable();
-    wordlist.dedup();
+    dict.sort_unstable();
+    dict.dedup();
 
     let length;
     let bits;
     if let Some(l) = opts.length {
         length = l;
     } else {
-        length = (opts.bits / (wordlist.len() as f64).log2()).ceil() as u32;
+        length = (opts.bits / (dict.len() as f64).log2()).ceil() as u32;
     }
 
-    let combinations = (wordlist.len() as f64).powf(f64::from(length));
+    let combinations = (dict.len() as f64).powf(f64::from(length));
     bits = (combinations).log2();
 
     let mut rng = rand::OsRng::new().expect("Failed to open RNG");
@@ -86,14 +89,14 @@ fn run() -> Result<(), Error> {
     if opts.verbose {
         println!(
             "# Complexity {}^{}={:.0}, {:.2} bits of entropy",
-            wordlist.len(),
+            dict.len(),
             length,
             combinations,
             bits
         );
     }
     for _ in 0..opts.number {
-        let pw = sample_dict(&mut rng, &wordlist, length as usize);
+        let pw = sample_dict(&mut rng, &dict, length as usize);
         println!("{}", pw.join(&opts.separator));
     }
 
