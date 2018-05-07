@@ -31,7 +31,7 @@ fn sample_dict(dict: &Vec<String>, samples: usize) -> Vec<String> {
 struct Opt {
     /// Activate verbose mode
     #[structopt(short = "v", long = "verbose")]
-    debug: bool,
+    verbose: bool,
     /// Number of passwords to generate
     #[structopt(short = "n", long = "number", default_value = "1")]
     number: u32,
@@ -74,13 +74,15 @@ fn run() -> Result<(), Error> {
     let combinations = (wordlist.len() as f64).powf(length as f64);
     bits = (combinations).log2();
 
-    println!(
-        "Complexity {}^{}={:.0}, {:.2} bits of entropy",
-        wordlist.len(),
-        length,
-        combinations,
-        bits
-    );
+    if opts.verbose {
+        println!(
+            "# Complexity {}^{}={:.0}, {:.2} bits of entropy",
+            wordlist.len(),
+            length,
+            combinations,
+            bits
+        );
+    }
     for _ in 0..opts.number {
         let pw = sample_dict(&wordlist, length as usize);
         println!("{}", pw.join(" "));
