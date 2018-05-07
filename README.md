@@ -8,6 +8,10 @@ cracking time of 75 years at 1 trillion guesses per second.
 It includes a bundled copy of the [EFF Diceware wordlist][1], which will be used
 as the default dictionary if another wordlist isn't provided.
 
+Passwords are selected using the OS random number generator (`/dev/urandom`,
+`getrandom()`, `getentropy()`, `RtlGenRandom`, etc) via Rust's rand::[OsRng][2]
+and sampled using its [range][3] API.
+
 ```
 -% mkpass --help
 mkpass 0.1.0
@@ -18,15 +22,16 @@ USAGE:
     mkpass [FLAGS] [OPTIONS]
 
 FLAGS:
-    -v, --verbose    Activate verbose mode
     -h, --help       Prints help information
     -V, --version    Prints version information
+    -v, --verbose    Activate verbose mode
 
 OPTIONS:
-    -b, --bits <bits>            Password strength target, 2^n [default: 72]
-    -l, --length <length>        Password length (overrides bits target)
-    -n, --number <number>        Number of passwords to generate [default: 1]
-    -w, --wordlist <wordlist>    Dictionary to use
+    -b, --bits <bits>              Password strength target, 2^n [default: 72]
+    -l, --length <length>          Password length (overrides bits target)
+    -n, --number <number>          Number of passwords to generate [default: 1]
+    -s, --separator <separator>    Word separator [default:  ]
+    -w, --wordlist <wordlist>      Dictionary to use (default: built-in EFF Diceware)
 ```
 
 ## Examples
@@ -47,3 +52,5 @@ cleruchy fructose pierine catchpole espathate refigure kinbote nonpreformed
 ```
 
 [1]: https://www.eff.org/dice
+[2]: https://rust-num.github.io/num/rand/os/struct.OsRng.html
+[3]: https://rust-num.github.io/num/rand/distributions/range/struct.Range.html
