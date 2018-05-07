@@ -37,7 +37,8 @@ OPTIONS:
 ## Examples
 
 ```
--% mkpass -n 5 -v # generate 10 passwords in verbose mode
+# generate 5 passwords in verbose mode
+-% mkpass -n 5 -v
 # Complexity 7776^6=221073919720733357899776, 77.55 bits of entropy
 carry pang flashing blouse mold antidote
 blustery shrimp gag squire epidural zoology
@@ -47,7 +48,8 @@ retiree diaper demystify igloo poem helmet
 ```
 
 ```
--% mkpass -b 128 # generate a 128-bit passphrase from the system dictionary
+# generate a 128-bit passphrase from the system dictionary
+-% mkpass -w /usr/share/dict/words -b 128
 cleruchy fructose pierine catchpole espathate refigure kinbote nonpreformed
 ```
 

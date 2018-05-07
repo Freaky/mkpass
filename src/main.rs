@@ -55,13 +55,12 @@ struct Opt {
 
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
-
-    let mut wordlist = String::new();
     let eff = include_str!("../eff.txt");
 
     let mut dict: Vec<&str> = vec![];
 
     if let Some(wl) = opts.wordlist {
+        let mut wordlist = String::new();
         let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
         inf.read_to_string(&mut wordlist)
             .with_context(|e| format!("{}: {}", &wl.display(), e))?;
