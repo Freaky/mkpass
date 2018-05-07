@@ -13,7 +13,7 @@ extern crate structopt;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-fn sample_dict(mut rng: &mut rand::OsRng, dict: &Vec<String>, samples: usize) -> Vec<String> {
+fn sample_dict(mut rng: &mut rand::OsRng, dict: &[String], samples: usize) -> Vec<String> {
     let range = Range::new(0, dict.len());
 
     let mut ret: Vec<String> = Vec::new();
@@ -78,7 +78,7 @@ fn run() -> Result<(), Error> {
         length = (opts.bits / (wordlist.len() as f64).log2()).ceil() as u32;
     }
 
-    let combinations = (wordlist.len() as f64).powf(length as f64);
+    let combinations = (wordlist.len() as f64).powf(f64::from(length));
     bits = (combinations).log2();
 
     let mut rng = rand::OsRng::new().expect("Failed to open RNG");
