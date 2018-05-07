@@ -36,7 +36,7 @@ struct Opt {
     #[structopt(short = "n", long = "number", default_value = "1")]
     number: u32,
     /// Password strength target, 2^n
-    #[structopt(short = "b", long = "bits", default_value = "64")]
+    #[structopt(short = "b", long = "bits", default_value = "72")]
     bits: f64,
     /// Password length (overrides bits target)
     #[structopt(short = "l", long = "length")]
