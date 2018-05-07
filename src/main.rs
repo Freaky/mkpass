@@ -13,13 +13,13 @@ extern crate structopt;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-fn sample_dict(mut rng: &mut rand::OsRng, dict: &[&str], samples: usize) -> Vec<String> {
+fn sample_dict<'a>(mut rng: &mut rand::OsRng, dict: &'a [&str], samples: usize) -> Vec<&'a str> {
     let range = Range::new(0, dict.len());
 
-    let mut ret: Vec<String> = Vec::new();
+    let mut ret: Vec<&str> = Vec::new();
 
     for _ in 0..samples {
-        ret.push(dict[range.ind_sample(&mut rng)].to_owned());
+        ret.push(dict[range.ind_sample(&mut rng)]);
     }
 
     ret
