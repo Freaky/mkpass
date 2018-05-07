@@ -27,7 +27,7 @@ fn sample_dict(dict: &Vec<String>, samples: usize) -> Vec<String> {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "mkpass", about = "Generate cryptographically secure passwords")]
+#[structopt(name = "mkpass", about = "Generate reasonably secure passwords")]
 struct Opt {
     /// Activate verbose mode
     #[structopt(short = "v", long = "verbose")]
@@ -49,11 +49,19 @@ struct Opt {
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
 
-    let wordlist = opts.wordlist.unwrap_or("eff.txt".into());
-    let inf = File::open(&wordlist).with_context(|e| format!("{}: {}", &wordlist.display(), e))?;
-    let inf = BufReader::new(inf);
+    let mut wordlist: Vec<String> = vec![];
+    if let Some(wl) = opts.wordlist {
+        let inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
+        let inf = BufReader::new(inf);
 
-    let wordlist: Vec<String> = inf.lines().map(|x| x.unwrap()).collect();
+        wordlist.extend(inf.lines().map(|x| x.unwrap().to_lowercase()));
+    } else {
+        let eff = include_str!("../eff.txt");
+        wordlist.extend(eff.lines().map(|x| x.to_lowercase()));
+    }
+
+    wordlist.sort_unstable();
+    wordlist.dedup();
 
     let length;
     let bits;
