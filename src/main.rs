@@ -13,8 +13,7 @@ extern crate structopt;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-fn sample_dict(dict: &Vec<String>, samples: usize) -> Vec<String> {
-    let mut rng = rand::thread_rng();
+fn sample_dict(mut rng: &mut rand::OsRng, dict: &Vec<String>, samples: usize) -> Vec<String> {
     let range = Range::new(0, dict.len());
 
     let mut ret: Vec<String> = Vec::new();
@@ -74,6 +73,8 @@ fn run() -> Result<(), Error> {
     let combinations = (wordlist.len() as f64).powf(length as f64);
     bits = (combinations).log2();
 
+    let mut rng = rand::OsRng::new().expect("Failed to open RNG");
+
     if opts.verbose {
         println!(
             "# Complexity {}^{}={:.0}, {:.2} bits of entropy",
@@ -84,7 +85,7 @@ fn run() -> Result<(), Error> {
         );
     }
     for _ in 0..opts.number {
-        let pw = sample_dict(&wordlist, length as usize);
+        let pw = sample_dict(&mut rng, &wordlist, length as usize);
         println!("{}", pw.join(" "));
     }
 
