@@ -31,16 +31,24 @@ struct Opt {
     /// Activate verbose mode
     #[structopt(short = "v", long = "verbose")]
     verbose: bool,
+
+    /// Word separator
+    #[structopt(short = "s", long = "separator", default_value = " ")]
+    separator: String,
+
     /// Number of passwords to generate
     #[structopt(short = "n", long = "number", default_value = "1")]
     number: u32,
+
     /// Password strength target, 2^n
     #[structopt(short = "b", long = "bits", default_value = "72")]
     bits: f64,
+
     /// Password length (overrides bits target)
     #[structopt(short = "l", long = "length")]
     length: Option<u32>,
-    /// Dictionary to use
+
+    /// Dictionary to use (default: built-in EFF Diceware)
     #[structopt(short = "w", long = "wordlist", parse(from_os_str))]
     wordlist: Option<PathBuf>,
 }
@@ -86,7 +94,7 @@ fn run() -> Result<(), Error> {
     }
     for _ in 0..opts.number {
         let pw = sample_dict(&mut rng, &wordlist, length as usize);
-        println!("{}", pw.join(" "));
+        println!("{}", pw.join(&opts.separator));
     }
 
     Ok(())
