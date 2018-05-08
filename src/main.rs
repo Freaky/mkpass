@@ -63,7 +63,11 @@ fn run() -> Result<(), Error> {
         let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
         inf.read_to_string(&mut wordlist)
             .with_context(|e| format!("{}: {}", &wl.display(), e))?;
-        dict = wordlist.lines().collect();
+        dict = wordlist
+            .lines()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .collect();
         dict.sort_unstable();
         dict.dedup();
     } else {
