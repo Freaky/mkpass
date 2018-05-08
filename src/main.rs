@@ -56,21 +56,19 @@ struct Opt {
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
     let eff = include_str!("../eff.txt");
-
-    let mut dict: Vec<&str> = vec![];
+    let mut wordlist = String::new();
+    let mut dict: Vec<&str>;
 
     if let Some(wl) = opts.wordlist {
-        let mut wordlist = String::new();
         let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
         inf.read_to_string(&mut wordlist)
             .with_context(|e| format!("{}: {}", &wl.display(), e))?;
-        dict.extend(wordlist.lines());
+        dict = wordlist.lines().collect();
+        dict.sort_unstable();
+        dict.dedup();
     } else {
-        dict.extend(eff.lines());
+        dict = eff.lines().collect();
     }
-
-    dict.sort_unstable();
-    dict.dedup();
 
     let length;
     let bits;
