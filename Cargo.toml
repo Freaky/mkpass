@@ -7,3 +7,4 @@ authors = ["Thomas Hurst <tom@hur.st>"]
 rand = "0.4.2"
 structopt = "0.2"
 failure = "0.1"
+lazy_static = "1.0"
