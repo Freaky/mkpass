@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -19,25 +18,24 @@ extern crate structopt;
 use structopt::StructOpt;
 
 struct PassFormat {
+    name: &'static str,
     data: &'static str,
     separator: String,
 }
 
 macro_rules! defdict {
-    ($map:expr, $name:expr, $separator:expr) => {
-        $map.insert(
-            $name,
-            PassFormat {
-                data: include_str!(concat!("../dictionaries/", $name, ".txt")),
-                separator: $separator.to_owned(),
-            },
-        );
+    ($vec:expr, $name:expr, $separator:expr) => {
+        $vec.push(PassFormat {
+            name: $name,
+            data: include_str!(concat!("../dictionaries/", $name, ".txt")),
+            separator: $separator.to_owned(),
+        });
     };
 }
 
 lazy_static! {
-    static ref DICTIONARIES: HashMap<&'static str, PassFormat> = {
-        let mut m = HashMap::new();
+    static ref DICTIONARIES: Vec<PassFormat> = {
+        let mut m = Vec::with_capacity(10);
         defdict!(m, "eff", " ");
         defdict!(m, "alpha", "");
         defdict!(m, "mixedalpha", "");
@@ -80,7 +78,7 @@ struct Opt {
 
     /// Built-in dictionary [default: eff]
     #[structopt(short = "d", long = "dictionary",
-                raw(possible_values = "&DICTIONARIES.keys().map(|s| *s).collect::<Vec<&str>>()"))]
+                raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()"))]
     dict: Option<String>,
 }
 
@@ -115,15 +113,12 @@ fn run() -> Result<(), Error> {
         dict.sort_unstable();
         dict.dedup();
     } else if let Some(d) = opts.dict {
-        if let Some(dd) = DICTIONARIES.get(&d[..]) {
-            dict = dd.data.lines().collect();
-            separator = dd.separator.clone();
-        } else {
-            bail!(
-                "Valid dictionaries: {:?}",
-                DICTIONARIES.keys().collect::<Vec<&&str>>()
-            );
-        }
+        let dd = DICTIONARIES
+            .iter()
+            .find(|x| x.name == &d[..])
+            .expect("Can't find dictionary");
+        dict = dd.data.lines().collect();
+        separator = dd.separator.clone();
     } else {
         dict = eff.lines().collect();
     }
