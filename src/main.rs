@@ -96,7 +96,6 @@ fn sample_dict<'a>(mut rng: &mut rand::OsRng, dict: &'a [&str], samples: usize) 
 
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
-    let eff = include_str!("../eff.txt");
     let mut wordlist = String::new();
     let mut dict: Vec<&str>;
     let mut separator = " ".to_owned();
@@ -112,15 +111,14 @@ fn run() -> Result<(), Error> {
             .collect();
         dict.sort_unstable();
         dict.dedup();
-    } else if let Some(d) = opts.dict {
+    } else {
+        let d = opts.dict.unwrap_or_else(|| "eff".to_owned());
         let dd = DICTIONARIES
             .iter()
             .find(|x| x.name == &d[..])
             .expect("Can't find dictionary");
         dict = dd.data.lines().collect();
         separator = dd.separator.clone();
-    } else {
-        dict = eff.lines().collect();
     }
 
     let length = opts.length
