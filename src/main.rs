@@ -85,13 +85,9 @@ struct Opt {
 fn sample_dict<'a>(mut rng: &mut rand::OsRng, dict: &'a [&str], samples: usize) -> Vec<&'a str> {
     let range = Range::new(0, dict.len());
 
-    let mut ret: Vec<&str> = Vec::new();
-
-    for _ in 0..samples {
-        ret.push(dict[range.ind_sample(&mut rng)]);
-    }
-
-    ret
+    (0..samples)
+        .map(|_| dict[range.ind_sample(&mut rng)])
+        .collect()
 }
 
 fn run() -> Result<(), Error> {
