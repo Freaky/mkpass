@@ -34,8 +34,10 @@ macro_rules! defdict {
 
 lazy_static! {
     static ref DICTIONARIES: Vec<PassFormat> = {
-        let mut m = Vec::with_capacity(10);
+        let mut m = Vec::with_capacity(11);
         defdict!(m, "eff", " ");
+        defdict!(m, "diceware", " ");
+        defdict!(m, "beale", " ");
         defdict!(m, "alpha", "");
         defdict!(m, "mixedalpha", "");
         defdict!(m, "mixedalphanumeric", "");
@@ -101,7 +103,7 @@ struct Opt {
     #[structopt(short = "w", long = "wordlist", parse(from_os_str))]
     wordlist: Option<PathBuf>,
 
-    /// Built-in dictionary [default: eff]
+    /// Built-in dictionary
     #[structopt(short = "d", long = "dictionary", default_value = "eff",
                 raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()"))]
     dict: String,
