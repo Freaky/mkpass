@@ -20,7 +20,7 @@ use structopt::StructOpt;
 struct PassFormat {
     name: &'static str,
     data: &'static str,
-    separator: String,
+    separator: &'static str,
 }
 
 macro_rules! defdict {
@@ -28,7 +28,7 @@ macro_rules! defdict {
         $vec.push(PassFormat {
             name: $name,
             data: include_str!(concat!("../dictionaries/", $name, ".txt")),
-            separator: $separator.to_owned(),
+            separator: $separator,
         });
     };
 }
@@ -94,7 +94,7 @@ fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
     let mut wordlist = String::new();
     let mut dict: Vec<&str>;
-    let mut separator = " ".to_owned();
+    let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
         let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
@@ -114,8 +114,10 @@ fn run() -> Result<(), Error> {
             .find(|x| x.name == &d[..])
             .expect("Can't find dictionary");
         dict = dd.data.lines().collect();
-        separator = dd.separator.clone();
+        separator = dd.separator;
     }
+
+    opts.separator.as_ref().map(|s| separator = s);
 
     let length = opts.length
         .unwrap_or((opts.bits / (dict.len() as f64).log2()).ceil() as u32);
