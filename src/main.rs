@@ -77,9 +77,9 @@ struct Opt {
     wordlist: Option<PathBuf>,
 
     /// Built-in dictionary [default: eff]
-    #[structopt(short = "d", long = "dictionary",
+    #[structopt(short = "d", long = "dictionary", default_value = "eff",
                 raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()"))]
-    dict: Option<String>,
+    dict: String,
 }
 
 fn sample_dict<'a>(mut rng: &mut rand::OsRng, dict: &'a [&str], samples: usize) -> Vec<&'a str> {
@@ -108,10 +108,9 @@ fn run() -> Result<(), Error> {
         dict.sort_unstable();
         dict.dedup();
     } else {
-        let d = opts.dict.unwrap_or_else(|| "eff".to_owned());
         let dd = DICTIONARIES
             .iter()
-            .find(|x| x.name == &d[..])
+            .find(|x| x.name == opts.dict)
             .expect("Can't find dictionary");
         dict = dd.data.lines().collect();
         separator = dd.separator;
