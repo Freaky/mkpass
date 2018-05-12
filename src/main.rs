@@ -52,16 +52,25 @@ lazy_static! {
 fn test_dictionaries() {
     for dict in DICTIONARIES.iter() {
         assert!(
-            dict.data
-                .lines()
-                .map(str::trim)
-                .filter(|s| s.is_empty())
-                .count() == 0
+            !dict.data.lines().any(|s| &s[..] != s.trim()),
+            "leading/trailing whitespace in {}",
+            dict.name
         );
+
+        assert!(
+            !dict.data.lines().any(str::is_empty),
+            "blank line in {}",
+            dict.name
+        );
+
         let mut lines = dict.data.lines().collect::<Vec<&str>>();
         lines.sort_unstable();
         lines.dedup();
-        assert!(dict.data.lines().count() == lines.len());
+        assert!(
+            dict.data.lines().count() == lines.len(),
+            "duplicate entry in {}",
+            dict.name
+        );
     }
 }
 
