@@ -61,7 +61,7 @@ cleruchy fructose pierine catchpole espathate refigure kinbote nonpreformed
 
 ```
 # generate a password using "koremutake" phonetics, with - as a separator
--% mkpass -d koremutake -s '-'
+-% mkpass -d koremutake -s -
 fri-vo-pu-tu-va-fre-fo-tre-dry-dri-ba
 ```
 
