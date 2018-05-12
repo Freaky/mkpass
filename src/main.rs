@@ -5,7 +5,6 @@ use std::path::PathBuf;
 extern crate rand;
 use rand::distributions::{IndependentSample, Range};
 
-#[macro_use]
 extern crate failure;
 use failure::{Error, ResultExt};
 
@@ -47,6 +46,23 @@ lazy_static! {
         defdict!(m, "koremutake", "");
         m
     };
+}
+
+#[test]
+fn test_dictionaries() {
+    for dict in DICTIONARIES.iter() {
+        assert!(
+            dict.data
+                .lines()
+                .map(str::trim)
+                .filter(|s| s.is_empty())
+                .count() == 0
+        );
+        let mut lines = dict.data.lines().collect::<Vec<&str>>();
+        lines.sort_unstable();
+        lines.dedup();
+        assert!(dict.data.lines().count() == lines.len());
+    }
 }
 
 #[derive(Debug, StructOpt)]
