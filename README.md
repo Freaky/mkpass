@@ -1,16 +1,20 @@
 # mkpass - make a password
 
-`mkpass` is a simple tool for generating passwords from wordlists.
+`mkpass` is a simple tool for generating passwords from dictionaries.
 
 It will target a minimum of 72 bits of entropy, which corresponds to an average
 cracking time of 75 years at 1 trillion guesses per second.
 
-It includes a bundled copy of the [EFF Diceware wordlist][1], which will be used
-as the default dictionary if another wordlist isn't provided.
+Bundled wordlists include:
+
+* eff — [EFF Diceware][eff] (default)
+* diceware — [Traditional Diceware][dice]
+* beale — Alan Beale's Diceware (linked above)
+* koremutake — [Shorl.com's Koremutake][kore]
 
 Passwords are selected using the OS random number generator (`/dev/urandom`,
-`getrandom()`, `getentropy()`, `RtlGenRandom`, etc) via Rust's rand::[OsRng][2]
-and sampled using its [range][3] API.
+`getrandom()`, `getentropy()`, `RtlGenRandom`, etc) via Rust's rand::[OsRng][osrng]
+and sampled using its [range][range] API.
 
 ```
 -% mkpass --help
@@ -28,10 +32,12 @@ FLAGS:
 
 OPTIONS:
     -b, --bits <bits>              Password strength target, 2^n [default: 72]
+    -d, --dictionary <dict>        Built-in dictionary [default: eff]  [possible values: eff, diceware, beale, alpha,
+                                   mixedalpha, mixedalphanumeric, alphanumeric, pin, hex, printable, koremutake]
     -l, --length <length>          Password length (overrides bits target)
     -n, --number <number>          Number of passwords to generate [default: 1]
-    -s, --separator <separator>    Word separator [default:  ]
-    -w, --wordlist <wordlist>      Dictionary to use (default: built-in EFF Diceware)
+    -s, --separator <separator>    Word separator
+    -w, --wordlist <wordlist>      External dictionary
 ```
 
 ## Examples
@@ -53,6 +59,14 @@ retiree diaper demystify igloo poem helmet
 cleruchy fructose pierine catchpole espathate refigure kinbote nonpreformed
 ```
 
-[1]: https://www.eff.org/dice
-[2]: https://rust-num.github.io/num/rand/os/struct.OsRng.html
-[3]: https://rust-num.github.io/num/rand/distributions/range/struct.Range.html
+```
+# generate a password using "koremutake" phonetics, with - as a separator
+-% mkpass -d koremutake -s '-'
+fri-vo-pu-tu-va-fre-fo-tre-dry-dri-ba
+```
+
+[eff]: https://www.eff.org/dice
+[dice]: http://world.std.com/~reinhold/diceware.html
+[kore]: http://shorl.com/koremutake.php
+[osrng]: https://rust-num.github.io/num/rand/os/struct.OsRng.html
+[range]: https://rust-num.github.io/num/rand/distributions/range/struct.Range.html
