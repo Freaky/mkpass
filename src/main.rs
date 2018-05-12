@@ -45,7 +45,7 @@ lazy_static! {
         defdict!(m, "pin", "");
         defdict!(m, "hex", "");
         defdict!(m, "printable", "");
-        defdict!(m, "koremutake", "");
+        defdict!(m, "koremutake", ".");
         m
     };
 }
