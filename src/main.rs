@@ -170,7 +170,7 @@ fn run() -> Result<(), Error> {
 
 fn main() {
     if let Err(e) = run() {
-        println!("{}", e);
+        eprintln!("{}", e);
         std::process::exit(64);
     }
 }
