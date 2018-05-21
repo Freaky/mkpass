@@ -36,6 +36,8 @@ lazy_static! {
     static ref DICTIONARIES: Vec<PassFormat> = {
         let mut m = Vec::with_capacity(11);
         defdict!(m, "eff", " ");
+        defdict!(m, "eff-short1", " ");
+        defdict!(m, "eff-short2", " ");
         defdict!(m, "diceware", " ");
         defdict!(m, "beale", " ");
         defdict!(m, "alpha", "");
@@ -135,12 +137,12 @@ fn run() -> Result<(), Error> {
         dict.sort_unstable();
         dict.dedup();
     } else {
-        let dd = DICTIONARIES
+        let d = DICTIONARIES
             .iter()
             .find(|x| x.name == opts.dict)
             .expect("Can't find dictionary");
-        dict = dd.data.lines().collect();
-        separator = dd.separator;
+        dict = d.data.lines().collect();
+        separator = d.separator;
     }
 
     opts.separator.as_ref().map(|s| separator = s);
