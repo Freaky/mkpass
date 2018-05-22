@@ -138,7 +138,9 @@ fn run() -> Result<(), Error> {
         separator = d.separator;
     }
 
-    opts.separator.as_ref().map(|s| separator = s);
+    if let Some(ref s) = opts.separator {
+        separator = s;
+    }
 
     let length = opts.length
         .unwrap_or((opts.bits / (dict.len() as f64).log2()).ceil() as u32);
