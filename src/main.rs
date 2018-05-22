@@ -154,8 +154,8 @@ fn run() -> Result<(), Error> {
         );
     }
 
-    let mut rng = rand::EntropyRng::new();
     let range = Uniform::from(0..dict.len());
+    let mut rng = rand::EntropyRng::new();
     let mut sampler = rng.sample_iter(&range);
     for _ in 0..opts.number {
         let pw = sampler
