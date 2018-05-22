@@ -13,8 +13,9 @@ Bundled wordlists include:
 * koremutake — [Shorl.com's Koremutake][kore]
 
 Passwords are selected using the OS random number generator (`/dev/urandom`,
-`getrandom()`, `getentropy()`, `RtlGenRandom`, etc) via Rust's rand::[OsRng][osrng]
-and sampled using its [range][range] API.
+`getrandom()`, `getentropy()`, `RtlGenRandom`, etc), or a [CPU jitter-based][jitrng]
+RNG via Rust's rand::[EntropyRng][entropyrng] and sampled using its
+[uniform distribution][uniform] API.
 
 ```
 -% mkpass --help
@@ -68,5 +69,6 @@ fri-vo-pu-tu-va-fre-fo-tre-dry-dri-ba
 [eff]: https://www.eff.org/dice
 [dice]: http://world.std.com/~reinhold/diceware.html
 [kore]: http://shorl.com/koremutake.php
-[osrng]: https://rust-num.github.io/num/rand/os/struct.OsRng.html
-[range]: https://rust-num.github.io/num/rand/distributions/range/struct.Range.html
+[entropyrng]: https://docs.rs/rand/0.5.0/rand/rngs/struct.EntropyRng.html
+[jitrng]: https://docs.rs/rand/0.5.0/rand/rngs/struct.JitterRng.html
+[uniform]: https://docs.rs/rand/0.5.0/rand/distributions/uniform/struct.Uniform.html

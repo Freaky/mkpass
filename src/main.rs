@@ -3,7 +3,8 @@ use std::io::Read;
 use std::path::PathBuf;
 
 extern crate rand;
-use rand::distributions::{IndependentSample, Range};
+use rand::Rng;
+use rand::distributions::Uniform;
 
 extern crate failure;
 use failure::{Error, ResultExt};
@@ -111,14 +112,6 @@ struct Opt {
     dict: String,
 }
 
-fn sample_dict<'a>(mut rng: &mut rand::OsRng, dict: &'a [&str], samples: usize) -> Vec<&'a str> {
-    let range = Range::new(0, dict.len());
-
-    (0..samples)
-        .map(|_| dict[range.ind_sample(&mut rng)])
-        .collect()
-}
-
 fn run() -> Result<(), Error> {
     let opts = Opt::from_args();
     let mut wordlist = String::new();
@@ -161,10 +154,17 @@ fn run() -> Result<(), Error> {
         );
     }
 
-    let mut rng = rand::OsRng::new().expect("Failed to open RNG");
+    let mut rng = rand::EntropyRng::new();
+    let range = Uniform::from(0..dict.len());
+    let mut sampler = rng.sample_iter(&range);
     for _ in 0..opts.number {
-        let pw = sample_dict(&mut rng, &dict, length as usize);
-        println!("{}", pw.join(&separator));
+        let pw = sampler
+            .by_ref()
+            .take(length as usize)
+            .map(|i| dict[i])
+            .collect::<Vec<&str>>()
+            .join(&separator);
+        println!("{}", pw);
     }
 
     Ok(())

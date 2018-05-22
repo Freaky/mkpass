@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Thomas Hurst <tom@hur.st>"]
 
 [dependencies]
-rand = "0.4.2"
+rand = "0.5"
 structopt = "0.2"
 failure = "0.1"
 lazy_static = "1.0"
