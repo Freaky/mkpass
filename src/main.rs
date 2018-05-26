@@ -57,7 +57,7 @@ lazy_static! {
 fn test_dictionaries() {
     for dict in DICTIONARIES.iter() {
         assert!(
-            !dict.data.lines().any(|s| &s[..] != s.trim()),
+            dict.data.lines().all(|s| &s[..] == s.trim()),
             "leading/trailing whitespace in {}",
             dict.name
         );
