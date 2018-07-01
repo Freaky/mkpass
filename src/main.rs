@@ -35,7 +35,7 @@ macro_rules! defdict {
 
 lazy_static! {
     static ref DICTIONARIES: Vec<PassFormat> = {
-        let mut m = Vec::with_capacity(11);
+        let mut m = Vec::with_capacity(13);
         defdict!(m, "eff", " ");
         defdict!(m, "eff-short1", " ");
         defdict!(m, "eff-short2", " ");
