@@ -6,5 +6,4 @@ authors = ["Thomas Hurst <tom@hur.st>"]
 [dependencies]
 rand = "0.5"
 structopt = "0.2"
-failure = "0.1"
 lazy_static = "1.0"

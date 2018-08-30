@@ -6,9 +6,6 @@ extern crate rand;
 use rand::Rng;
 use rand::distributions::Uniform;
 
-extern crate failure;
-use failure::{Error, ResultExt};
-
 #[macro_use]
 extern crate lazy_static;
 
@@ -112,16 +109,16 @@ struct Opt {
     dict: String,
 }
 
-fn run() -> Result<(), Error> {
+fn run() -> Result<(), String> {
     let opts = Opt::from_args();
     let mut wordlist = String::new();
     let mut dict: Vec<&str>;
     let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
-        let mut inf = File::open(&wl).with_context(|e| format!("{}: {}", &wl.display(), e))?;
+        let mut inf = File::open(&wl).map_err(|e| format!("{}: {}", &wl.display(), e))?;
         inf.read_to_string(&mut wordlist)
-            .with_context(|e| format!("{}: {}", &wl.display(), e))?;
+            .map_err(|e| format!("{}: {}", &wl.display(), e))?;
         dict = wordlist
             .lines()
             .map(str::trim)
