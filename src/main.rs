@@ -56,6 +56,12 @@ lazy_static! {
 fn test_dictionaries() {
     for dict in DICTIONARIES.iter() {
         assert!(
+            dict.data.lines().count() > 1,
+            "{} is too short",
+            dict.name
+        );
+
+        assert!(
             dict.data.lines().all(|s| &s[..] == s.trim()),
             "leading/trailing whitespace in {}",
             dict.name
@@ -132,8 +138,8 @@ fn run() -> Result<(), String> {
             .into_iter()
             .collect();
 
-        if dict.is_empty() {
-            return Err(format!("{}: is empty", &wl.display()));
+        if dict.len() < 2 {
+            return Err(format!("{}: dictionary too short", &wl.display()));
         }
     } else {
         let d = DICTIONARIES
