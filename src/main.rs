@@ -21,13 +21,13 @@ struct PassFormat {
 }
 
 macro_rules! defdicts {
-    ($(($name:expr, $separator:expr)),*) => ({
+    ($(($name:expr, $separator:expr)),*) => {
         vec![$(PassFormat {
             name: $name,
             data: include_str!(concat!("../dictionaries/", $name, ".txt")),
             separator: $separator,
         },)*]
-    });
+    };
 }
 
 lazy_static! {
