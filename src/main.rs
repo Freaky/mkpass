@@ -1,10 +1,10 @@
+use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use std::collections::HashSet;
 
 extern crate rand;
-use rand::Rng;
 use rand::distributions::Uniform;
+use rand::Rng;
 
 #[macro_use]
 extern crate lazy_static;
@@ -73,7 +73,10 @@ fn test_dictionaries() {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "mkpass", about = "Generate reasonably secure passwords")]
+#[structopt(
+    name = "mkpass",
+    about = "Generate reasonably secure passwords"
+)]
 struct Opt {
     /// Activate verbose mode
     #[structopt(short = "v", long = "verbose")]
@@ -100,8 +103,12 @@ struct Opt {
     wordlist: Option<PathBuf>,
 
     /// Built-in dictionary
-    #[structopt(short = "d", long = "dictionary", default_value = "eff",
-                raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()"))]
+    #[structopt(
+        short = "d",
+        long = "dictionary",
+        default_value = "eff",
+        raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()")
+    )]
     dict: String,
 }
 
@@ -133,7 +140,8 @@ fn run() -> Result<(), String> {
         separator = s;
     }
 
-    let length = opts.length
+    let length = opts
+        .length
         .unwrap_or((opts.bits / (dict.len() as f64).log2()).ceil() as u32);
 
     if opts.verbose {
