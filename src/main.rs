@@ -20,33 +20,31 @@ struct PassFormat {
     separator: &'static str,
 }
 
-macro_rules! defdict {
-    ($vec:expr, $name:expr, $separator:expr) => {
-        $vec.push(PassFormat {
+macro_rules! defdicts {
+    ($(($name:expr, $separator:expr)),*) => ({
+        vec![$(PassFormat {
             name: $name,
             data: include_str!(concat!("../dictionaries/", $name, ".txt")),
             separator: $separator,
-        });
-    };
+        },)*]
+    });
 }
 
 lazy_static! {
-    static ref DICTIONARIES: Vec<PassFormat> = {
-        let mut m = Vec::with_capacity(13);
-        defdict!(m, "eff", " ");
-        defdict!(m, "eff-short1", " ");
-        defdict!(m, "eff-short2", " ");
-        defdict!(m, "diceware", " ");
-        defdict!(m, "beale", " ");
-        defdict!(m, "alpha", "");
-        defdict!(m, "mixedalpha", "");
-        defdict!(m, "mixedalphanumeric", "");
-        defdict!(m, "alphanumeric", "");
-        defdict!(m, "pin", "");
-        defdict!(m, "hex", "");
-        defdict!(m, "printable", "");
-        defdict!(m, "koremutake", ".");
-        m
+    static ref DICTIONARIES: Vec<PassFormat> = defdicts! {
+        ("eff", " "),
+        ("eff-short1", " "),
+        ("eff-short2", " "),
+        ("diceware", " "),
+        ("beale", " "),
+        ("alpha", ""),
+        ("mixedalpha", ""),
+        ("mixedalphanumeric", ""),
+        ("alphanumeric", ""),
+        ("pin", ""),
+        ("hex", ""),
+        ("printable", ""),
+        ("koremutake", ".")
     };
 }
 
