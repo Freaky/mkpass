@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::Read;
+use std::fs::read_to_string;
 use std::path::PathBuf;
 use std::collections::HashSet;
 
@@ -112,14 +111,12 @@ struct Opt {
 
 fn run() -> Result<(), String> {
     let opts = Opt::from_args();
-    let mut wordlist = String::new();
+    let wordlist;
     let dict: Vec<&str>;
     let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
-        let mut inf = File::open(&wl).map_err(|e| format!("{}: {}", &wl.display(), e))?;
-        inf.read_to_string(&mut wordlist)
-            .map_err(|e| format!("{}: {}", &wl.display(), e))?;
+        wordlist = read_to_string(&wl).map_err(|e| format!("{}: {}", &wl.display(), e))?;
         dict = wordlist
             .lines()
             .map(str::trim)
