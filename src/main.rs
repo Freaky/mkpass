@@ -131,6 +131,10 @@ fn run() -> Result<(), String> {
             .collect::<HashSet<_>>()
             .into_iter()
             .collect();
+
+        if dict.is_empty() {
+            return Err(format!("{}: is empty", &wl.display()));
+        }
     } else {
         let d = DICTIONARIES
             .iter()
