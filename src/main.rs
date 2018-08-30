@@ -67,9 +67,9 @@ fn test_dictionaries() {
             dict.name
         );
 
-        let lines = dict.data.lines().collect::<HashSet<_>>();
-        assert!(
-            dict.data.lines().count() == lines.len(),
+        assert_eq!(
+            dict.data.lines().count(),
+            dict.data.lines().collect::<HashSet<_>>().len(),
             "duplicate entry in {}",
             dict.name
         );
