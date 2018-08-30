@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use std::collections::HashSet;
 
 extern crate rand;
 use rand::Rng;
@@ -112,7 +113,7 @@ struct Opt {
 fn run() -> Result<(), String> {
     let opts = Opt::from_args();
     let mut wordlist = String::new();
-    let mut dict: Vec<&str>;
+    let dict: Vec<&str>;
     let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
@@ -123,9 +124,9 @@ fn run() -> Result<(), String> {
             .lines()
             .map(str::trim)
             .filter(|s| !s.is_empty())
+            .collect::<HashSet<_>>()
+            .into_iter()
             .collect();
-        dict.sort_unstable();
-        dict.dedup();
     } else {
         let d = DICTIONARIES
             .iter()
