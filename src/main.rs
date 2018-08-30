@@ -65,9 +65,7 @@ fn test_dictionaries() {
             dict.name
         );
 
-        let mut lines = dict.data.lines().collect::<Vec<&str>>();
-        lines.sort_unstable();
-        lines.dedup();
+        let lines = dict.data.lines().collect::<HashSet<_>>();
         assert!(
             dict.data.lines().count() == lines.len(),
             "duplicate entry in {}",
