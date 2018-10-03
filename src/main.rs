@@ -21,7 +21,7 @@ struct PassFormat {
 }
 
 macro_rules! defdicts {
-    ($(($name:expr, $separator:expr)),*) => {
+    ($($name:expr => $separator:expr)*) => {
         vec![
             $(
                 PassFormat {
@@ -36,19 +36,19 @@ macro_rules! defdicts {
 
 lazy_static! {
     static ref DICTIONARIES: Vec<PassFormat> = defdicts! {
-        ("eff", " "),
-        ("eff-short1", " "),
-        ("eff-short2", " "),
-        ("diceware", " "),
-        ("beale", " "),
-        ("alpha", ""),
-        ("mixedalpha", ""),
-        ("mixedalphanumeric", ""),
-        ("alphanumeric", ""),
-        ("pin", ""),
-        ("hex", ""),
-        ("printable", ""),
-        ("koremutake", ".")
+        "eff"               => " "
+        "eff-short1"        => " "
+        "eff-short2"        => " "
+        "diceware"          => " "
+        "beale"             => " "
+        "alpha"             => ""
+        "mixedalpha"        => ""
+        "mixedalphanumeric" => ""
+        "alphanumeric"      => ""
+        "pin"               => ""
+        "hex"               => ""
+        "printable"         => ""
+        "koremutake"        => "."
     };
 }
 
