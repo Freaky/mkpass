@@ -2,9 +2,9 @@ use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 
+use lazy_static::lazy_static;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
-use lazy_static::lazy_static;
 use structopt::StructOpt;
 
 struct PassFormat {
@@ -48,11 +48,7 @@ lazy_static! {
 #[test]
 fn test_dictionaries() {
     for dict in DICTIONARIES.iter() {
-        assert!(
-            dict.data.lines().count() > 1,
-            "{} is too short",
-            dict.name
-        );
+        assert!(dict.data.lines().count() > 1, "{} is too short", dict.name);
 
         assert!(
             dict.data.lines().all(|s| &s[..] == s.trim()),
@@ -76,10 +72,7 @@ fn test_dictionaries() {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(
-    name = "mkpass",
-    about = "Generate reasonably secure passwords"
-)]
+#[structopt(name = "mkpass", about = "Generate reasonably secure passwords")]
 struct Opt {
     /// Activate verbose mode
     #[structopt(short = "v", long = "verbose")]
