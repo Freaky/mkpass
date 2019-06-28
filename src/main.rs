@@ -2,15 +2,10 @@ use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 
-extern crate rand;
 use rand::distributions::Uniform;
 use rand::Rng;
 
-#[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
-extern crate structopt;
+use lazy_static::lazy_static;
 
 use structopt::StructOpt;
 
