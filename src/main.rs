@@ -2,11 +2,9 @@ use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 
-use rand::distributions::Uniform;
-use rand::Rng;
-
+use rand::distributions::{Distribution, Uniform};
+use rand::rngs::OsRng;
 use lazy_static::lazy_static;
-
 use structopt::StructOpt;
 
 struct PassFormat {
@@ -164,9 +162,7 @@ fn run() -> Result<(), String> {
         );
     }
 
-    let range = Uniform::from(0..dict.len());
-    let mut rng = rand::EntropyRng::new();
-    let mut sampler = rng.sample_iter(&range);
+    let mut sampler = Uniform::from(0..dict.len()).sample_iter(OsRng);
     for _ in 0..opts.number {
         let pw = sampler
             .by_ref()
