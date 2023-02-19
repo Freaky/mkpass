@@ -165,7 +165,7 @@ fn main() -> Result<()> {
             .take(length as usize)
             .map(|i| dict[i])
             .collect::<Vec<&str>>()
-            .join(&separator);
+            .join(separator);
         println!("{}", pw);
     }
 
