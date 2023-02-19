@@ -2,10 +2,11 @@ use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 
+use clap::Parser;
+use eyre::{ensure, eyre, Result, WrapErr};
 use lazy_static::lazy_static;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
-use clap::Parser;
 
 struct PassFormat {
     name: &'static str,
@@ -83,7 +84,7 @@ struct Opt {
     separator: Option<String>,
 
     /// Number of passwords to generate
-    #[arg(short, long, default_value = "1")]
+    #[arg(short, long, default_value = "1", value_parser = clap::value_parser!(u32).range(1..))]
     number: u32,
 
     /// Password strength target, 2^n
@@ -91,7 +92,7 @@ struct Opt {
     bits: f64,
 
     /// Password length (overrides bits target)
-    #[arg(short, long)]
+    #[arg(short, long, value_parser = clap::value_parser!(u32).range(1..))]
     length: Option<u32>,
 
     /// External dictionary
@@ -108,14 +109,15 @@ struct Opt {
     dict: String,
 }
 
-fn run() -> Result<(), String> {
+fn main() -> Result<()> {
     let opts = Opt::parse();
     let wordlist;
     let dict: Vec<&str>;
     let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
-        wordlist = read_to_string(&wl).map_err(|e| format!("{}: {}", &wl.display(), e))?;
+        wordlist = read_to_string(&wl)
+            .wrap_err_with(|| format!("Failed to read word list from {}", &wl.display()))?;
         dict = wordlist
             .lines()
             .map(str::trim)
@@ -124,9 +126,10 @@ fn run() -> Result<(), String> {
             .into_iter()
             .collect();
 
-        if dict.len() < 2 {
-            return Err(format!("{}: dictionary too short", &wl.display()));
-        }
+        ensure!(
+            dict.len() > 2,
+            eyre!("{}: dictionary too short", &wl.display())
+        );
     } else {
         let d = DICTIONARIES
             .iter()
@@ -167,11 +170,4 @@ fn run() -> Result<(), String> {
     }
 
     Ok(())
-}
-
-fn main() {
-    if let Err(e) = run() {
-        eprintln!("{}", e);
-        std::process::exit(64);
-    }
 }
