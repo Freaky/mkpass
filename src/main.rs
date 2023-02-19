@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use lazy_static::lazy_static;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
-use structopt::StructOpt;
+use clap::Parser;
 
 struct PassFormat {
     name: &'static str,
@@ -71,45 +71,45 @@ fn test_dictionaries() {
     }
 }
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "mkpass", about = "Generate reasonably secure passwords")]
+#[derive(Debug, Parser)]
+#[command(author, version, about = "Generate reasonably secure passwords")]
 struct Opt {
     /// Activate verbose mode
-    #[structopt(short = "v", long = "verbose")]
+    #[arg(short, long)]
     verbose: bool,
 
     /// Word separator
-    #[structopt(short = "s", long = "separator")]
+    #[arg(short, long)]
     separator: Option<String>,
 
     /// Number of passwords to generate
-    #[structopt(short = "n", long = "number", default_value = "1")]
+    #[arg(short, long, default_value = "1")]
     number: u32,
 
     /// Password strength target, 2^n
-    #[structopt(short = "b", long = "bits", default_value = "72")]
+    #[arg(short, long, default_value = "72")]
     bits: f64,
 
     /// Password length (overrides bits target)
-    #[structopt(short = "l", long = "length")]
+    #[arg(short, long)]
     length: Option<u32>,
 
     /// External dictionary
-    #[structopt(short = "w", long = "wordlist", parse(from_os_str))]
+    #[arg(short, long, value_name = "FILE")]
     wordlist: Option<PathBuf>,
 
     /// Built-in dictionary
-    #[structopt(
-        short = "d",
+    #[arg(
+        short,
         long = "dictionary",
         default_value = "eff",
-        raw(possible_values = "&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>()")
+        value_parser = clap::builder::PossibleValuesParser::new(&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>())
     )]
     dict: String,
 }
 
 fn run() -> Result<(), String> {
-    let opts = Opt::from_args();
+    let opts = Opt::parse();
     let wordlist;
     let dict: Vec<&str>;
     let mut separator = " ";
