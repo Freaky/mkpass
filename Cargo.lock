@@ -165,6 +165,7 @@ dependencies = [
  "eyre",
  "lazy_static",
  "rand",
+ "read-restrict",
 ]
 
 [[package]]
@@ -256,6 +257,12 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
+
+[[package]]
+name = "read-restrict"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f8258dbe9cd2ac4fc41981ad7b298d9c6dcff8f21ee8a601aa72c425a4b4999"
 
 [[package]]
 name = "rustix"

@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::fs::read_to_string;
 use std::path::PathBuf;
 
 use clap::Parser;
@@ -7,6 +6,7 @@ use eyre::{ensure, eyre, Result, WrapErr};
 use lazy_static::lazy_static;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
+use read_restrict::read_to_string;
 
 struct PassFormat {
     name: &'static str,
@@ -116,7 +116,7 @@ fn main() -> Result<()> {
     let mut separator = " ";
 
     if let Some(wl) = opts.wordlist {
-        wordlist = read_to_string(&wl)
+        wordlist = read_to_string(&wl, 1024 * 1024 * 128)
             .wrap_err_with(|| format!("Failed to read word list from {}", &wl.display()))?;
         dict = wordlist
             .lines()
