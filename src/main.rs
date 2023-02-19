@@ -158,15 +158,17 @@ fn main() -> Result<()> {
         );
     }
 
-    let mut sampler = Uniform::from(0..dict.len()).sample_iter(OsRng);
+    let mut random_words = Uniform::from(0..dict.len())
+        .sample_iter(OsRng)
+        .map(|i| dict[i]);
+
     for _ in 0..opts.number {
-        let pw = sampler
+        let password = random_words
             .by_ref()
             .take(length as usize)
-            .map(|i| dict[i])
             .collect::<Vec<&str>>()
             .join(separator);
-        println!("{}", pw);
+        println!("{}", password);
     }
 
     Ok(())
