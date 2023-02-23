@@ -52,7 +52,7 @@ fn test_dictionaries() {
         assert!(dict.data.lines().count() > 1, "{} is too short", dict.name);
 
         assert!(
-            dict.data.lines().all(|s| &s[..] == s.trim()),
+            dict.data.lines().all(|s| s == s.trim()),
             "leading/trailing whitespace in {}",
             dict.name
         );
