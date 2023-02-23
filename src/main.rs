@@ -94,7 +94,7 @@ struct Opt {
     #[arg(short, long, value_parser = clap::value_parser!(u32).range(1..))]
     length: Option<u32>,
 
-    /// External dictionary
+    /// External dictionary, line-separated
     #[arg(short, long, value_name = "PATH")]
     file: Option<PathBuf>,
 
@@ -102,15 +102,15 @@ struct Opt {
     #[arg(
         short,
         short_alias = 'w',
-        long = "dictionary",
+        long,
         default_value = "eff",
         value_parser = clap::builder::PossibleValuesParser::new(&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>())
     )]
-    dict: String,
+    dictionary: String,
 
     /// Describe built-in dictionaries
-    #[arg(short = 'D', long = "list-dictionaries")]
-    list_dict: bool,
+    #[arg(short = 'D', long)]
+    list_dictionaries: bool,
 }
 
 fn list_dictionaries() {
@@ -148,7 +148,7 @@ fn main() -> Result<()> {
     } else {
         let d = DICTIONARIES
             .iter()
-            .find(|x| x.name == opts.dict)
+            .find(|x| x.name == opts.dictionary)
             .expect("Can't find dictionary");
         dict = d.data.lines().collect();
         separator = d.separator;
@@ -158,7 +158,7 @@ fn main() -> Result<()> {
         separator = s;
     }
 
-    if opts.list_dict {
+    if opts.list_dictionaries {
         list_dictionaries();
         return Ok(());
     }
