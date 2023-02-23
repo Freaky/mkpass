@@ -95,12 +95,13 @@ struct Opt {
     length: Option<u32>,
 
     /// External dictionary
-    #[arg(short, long, value_name = "FILE")]
-    wordlist: Option<PathBuf>,
+    #[arg(short, long, value_name = "PATH")]
+    file: Option<PathBuf>,
 
     /// Built-in dictionary
     #[arg(
         short,
+        short_alias = 'w',
         long = "dictionary",
         default_value = "eff",
         value_parser = clap::builder::PossibleValuesParser::new(&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>())
@@ -129,7 +130,7 @@ fn main() -> Result<()> {
     let dict: Vec<&str>;
     let mut separator = " ";
 
-    if let Some(wl) = opts.wordlist {
+    if let Some(wl) = opts.file {
         wordlist = read_to_string(&wl, 1024 * 1024 * 128)
             .wrap_err_with(|| format!("Failed to read word list from {}", &wl.display()))?;
         dict = wordlist
