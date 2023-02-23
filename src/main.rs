@@ -3,7 +3,6 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use eyre::{ensure, eyre, Result, WrapErr};
-use lazy_static::lazy_static;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
 use read_restrict::read_to_string;
@@ -16,7 +15,7 @@ struct PassFormat {
 
 macro_rules! defdicts {
     ($($name:expr => $separator:expr)*) => {
-        vec![
+        &[
             $(
                 PassFormat {
                     name: $name,
@@ -28,23 +27,21 @@ macro_rules! defdicts {
     };
 }
 
-lazy_static! {
-    static ref DICTIONARIES: Vec<PassFormat> = defdicts! {
-        "eff"               => " "
-        "eff-short1"        => " "
-        "eff-short2"        => " "
-        "diceware"          => " "
-        "beale"             => " "
-        "alpha"             => ""
-        "mixedalpha"        => ""
-        "mixedalphanumeric" => ""
-        "alphanumeric"      => ""
-        "pin"               => ""
-        "hex"               => ""
-        "printable"         => ""
-        "koremutake"        => "."
-    };
-}
+const DICTIONARIES: &[PassFormat] = defdicts! {
+    "eff"               => " "
+    "eff-short1"        => " "
+    "eff-short2"        => " "
+    "diceware"          => " "
+    "beale"             => " "
+    "alpha"             => ""
+    "mixedalpha"        => ""
+    "mixedalphanumeric" => ""
+    "alphanumeric"      => ""
+    "pin"               => ""
+    "hex"               => ""
+    "printable"         => ""
+    "koremutake"        => "."
+};
 
 #[test]
 fn test_dictionaries() {

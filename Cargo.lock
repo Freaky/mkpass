@@ -112,6 +112,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fed44880c466736ef9a5c5b5facefb5ed0785676d0c02d612db14e54f0d84286"
 
 [[package]]
+name = "include-lines"
+version = "1.1.2"
+dependencies = [
+ "include-lines-proc",
+]
+
+[[package]]
+name = "include-lines-proc"
+version = "1.1.0"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "indenter"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -163,6 +178,7 @@ version = "0.3.0"
 dependencies = [
  "clap",
  "eyre",
+ "include-lines",
  "lazy_static",
  "rand",
  "read-restrict",
