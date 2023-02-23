@@ -83,7 +83,7 @@ struct Opt {
     separator: Option<String>,
 
     /// Number of passwords to generate
-    #[arg(short, long, default_value = "1", value_parser = clap::value_parser!(u32).range(1..))]
+    #[arg(short, short_alias = 'c', long, default_value = "1", value_parser = clap::value_parser!(u32).range(1..))]
     number: u32,
 
     /// Password strength target, 2^n
