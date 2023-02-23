@@ -11,16 +11,18 @@ struct PassFormat {
     name: &'static str,
     data: &'static str,
     separator: &'static str,
+    description: &'static str,
 }
 
 macro_rules! defdicts {
-    ($($name:expr => $separator:expr)*) => {
+    ($($name:literal + $separator:literal = $description:literal)*) => {
         &[
             $(
                 PassFormat {
                     name: $name,
                     data: include_str!(concat!("../dictionaries/", $name, ".txt")),
                     separator: $separator,
+                    description: $description,
                 },
             )*
         ]
@@ -28,19 +30,19 @@ macro_rules! defdicts {
 }
 
 const DICTIONARIES: &[PassFormat] = defdicts! {
-    "eff"               => " "
-    "eff-short1"        => " "
-    "eff-short2"        => " "
-    "diceware"          => " "
-    "beale"             => " "
-    "alpha"             => ""
-    "mixedalpha"        => ""
-    "mixedalphanumeric" => ""
-    "alphanumeric"      => ""
-    "pin"               => ""
-    "hex"               => ""
-    "printable"         => ""
-    "koremutake"        => "."
+    "eff"               + " " = "EFF Long Wordlist\n  https://www.eff.org/dice"
+    "eff-short1"        + " " = "EFF Short Wordlist - Fewer, shorter words"
+    "eff-short2"        + " " = "EFF Short Wordlist - Fewer, longer words"
+    "diceware"          + " " = "Arnold G. Reinhold's Diceware word list\n  https://theworld.com/~reinhold/diceware.html"
+    "beale"             + " " = "Alan Beale's Diceware word list, \"contains fewer Americanisms and obscure words\""
+    "alpha"             + ""  = "Lower-case a-z"
+    "mixedalpha"        + ""  = "Mixed-case a-z"
+    "mixedalphanumeric" + ""  = "Mixed-case a-z 0-9"
+    "alphanumeric"      + ""  = "Lower-case a-z 0-9"
+    "pin"               + ""  = "Numeric"
+    "hex"               + ""  = "Hexadecimal"
+    "printable"         + ""  = "Mixed-case a-z 0-9 plus standard ASCII symbols"
+    "koremutake"        + "." = "A \"way to express any large number as a sequence of syllables\"\n  https://shorl.com/koremutake.php"
 };
 
 #[test]
@@ -104,6 +106,21 @@ struct Opt {
         value_parser = clap::builder::PossibleValuesParser::new(&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>())
     )]
     dict: String,
+
+    /// Describe built-in dictionaries
+    #[arg(short = 'D', long = "list-dictionaries")]
+    list_dict: bool,
+}
+
+fn list_dictionaries() {
+    for dict in DICTIONARIES {
+        println!(
+            "{}: {} entries\n  {}\n",
+            dict.name,
+            dict.data.lines().count(),
+            dict.description
+        );
+    }
 }
 
 fn main() -> Result<()> {
@@ -138,6 +155,11 @@ fn main() -> Result<()> {
 
     if let Some(ref s) = opts.separator {
         separator = s;
+    }
+
+    if opts.list_dict {
+        list_dictionaries();
+        return Ok(());
     }
 
     let length = opts
