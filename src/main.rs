@@ -96,8 +96,7 @@ fn password_strength(entropy: u32) -> &'static str {
     THRESHOLDS
         .iter()
         .find(|(thresh, _)| entropy < *thresh)
-        .map(|(_, desc)| *desc)
-        .unwrap_or("overkill")
+        .map_or("overkill", |(_, desc)| *desc)
 }
 
 fn human_duration(secs: f64) -> String {
