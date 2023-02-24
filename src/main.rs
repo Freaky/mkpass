@@ -15,14 +15,6 @@ struct PassFormat {
     description: &'static str,
 }
 
-#[derive(Default, Debug)]
-struct CrackTime {
-    online: f64,
-    online_throttled: f64,
-    offline_fast: f64,
-    offline_slow: f64,
-}
-
 macro_rules! defdicts {
     ($($name:literal + $separator:literal = $description:literal)*) => {
         &[
@@ -80,18 +72,14 @@ fn test_dictionaries() {
     }
 }
 
-impl CrackTime {
-    fn from_combinations(combinations: f64) -> Self {
-        // You have better than even odds after exhausting half the options
-        let combinations = combinations / 2.0;
-
-        Self {
-            online: combinations / 10.0,
-            online_throttled: combinations / (10.0 / 3600.0),
-            offline_fast: combinations / 1e10,
-            offline_slow: combinations / 1e4,
-        }
-    }
+fn crack_times(combinations: f64) -> Vec<(&'static str, f64)> {
+    vec![
+        ("Online, unthrottled (10/s)", combinations / 10.0),
+        ("Online, throttled (100/h)", combinations / (10.0 / 3600.0)),
+        ("Offline, slow (1e4/s)", combinations / 1e4),
+        ("Offline, fast (1e10/s)", combinations / 1e10),
+        ("Offline, extreme (1e12/s)", combinations / 1e12),
+    ]
 }
 
 fn password_strength(entropy: u32) -> &'static str {
@@ -252,7 +240,6 @@ fn main() -> Result<()> {
     if opts.verbose {
         let combinations = (dict.len() as f64).powf(f64::from(length));
         let entropy = combinations.log2();
-        let crack_time = CrackTime::from_combinations(combinations);
         eprintln!(
             "# {:>12}: {}^{} = {:.0}",
             "Combinations",
@@ -268,26 +255,9 @@ fn main() -> Result<()> {
         );
         eprintln!("#");
         eprintln!("# Attack time estimate:");
-        eprintln!(
-            "# {:>30}: {}",
-            "Online, unthrottled (10/s)",
-            human_duration(crack_time.online)
-        );
-        eprintln!(
-            "# {:>30}: {}",
-            "Online, throttled (100/h)",
-            human_duration(crack_time.online_throttled)
-        );
-        eprintln!(
-            "# {:>30}: {}",
-            "Offline, fast (1e10/s)",
-            human_duration(crack_time.offline_fast)
-        );
-        eprintln!(
-            "# {:>30}: {}",
-            "Offline, slow (1e4/s)",
-            human_duration(crack_time.offline_slow)
-        );
+        for (attack, duration) in crack_times(combinations) {
+            eprintln!("# {:>28}: {}", attack, human_duration(duration));
+        }
         eprintln!("#");
     }
 
