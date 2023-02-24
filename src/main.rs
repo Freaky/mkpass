@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use eyre::{ensure, eyre, Result, WrapErr};
+use ibig::UBig;
 use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
 use read_restrict::read_to_string;
@@ -74,13 +75,16 @@ fn test_dictionaries() {
     }
 }
 
-fn crack_times(combinations: f64) -> Vec<(&'static str, f64)> {
+fn crack_times(combinations: &UBig) -> Vec<(&'static str, UBig)> {
     vec![
-        ("Online, unthrottled (10/s)", combinations / 10.0),
-        ("Online, throttled (100/h)", combinations / (10.0 / 3600.0)),
-        ("Offline, slow (1e4/s)", combinations / 1e4),
-        ("Offline, fast (1e10/s)", combinations / 1e10),
-        ("Offline, extreme (1e12/s)", combinations / 1e12),
+        ("Online, unthrottled (10/s)", combinations / 10),
+        ("Online, throttled (1/s)", combinations.clone()),
+        ("Offline, slow (1e4/s)", combinations / 1000),
+        ("Offline, fast (1e10/s)", combinations / 10_000_000_000u64),
+        (
+            "Offline, extreme (1e12/s)",
+            combinations / 1_000_000_000_000u64,
+        ),
     ]
 }
 
@@ -101,33 +105,40 @@ fn password_strength(entropy: u32) -> &'static str {
         .map_or("overkill", |(_, desc)| *desc)
 }
 
-fn human_duration(secs: f64) -> String {
-    const THRESHOLDS: &[(f64, &str, &str)] = &[
-        (60.0, "minute", "minutes"),
-        (24.0, "hour", "hours"),
-        (30.437, "day", "days"),
-        (12.0, "month", "months"),
-        (10.0, "year", "years"),
-        (10.0, "decade", "decades"),
-        (10.0, "century", "centuries"),
-        (1000.0, "millennium", "millennia"),
-        (1000.0, "million year", "million years"),
-        (1000.0, "billion year", "billion years"),
+fn human_duration(secs: UBig) -> String {
+    let thresholds: &[(UBig, &str, &str)] = &[
+        (60u32.into(), "minute", "minutes"),
+        (24u32.into(), "hour", "hours"),
+        (30u32.into(), "day", "days"),
+        (12u32.into(), "month", "months"),
+        (10u32.into(), "year", "years"),
+        (10u32.into(), "decade", "decades"),
+        (10u32.into(), "century", "centuries"),
+        (1000u32.into(), "millennium", "millennia"),
+        (1000u32.into(), "million year", "million years"),
+        (1000u32.into(), "billion year", "billion years"),
     ];
 
-    if secs < 1.0 {
+    if secs < 1u32.into() {
         return "less than a second".to_string();
-    } else if secs < 60.0 {
+    } else if secs < 60u32.into() {
         return "less than a minute".to_string();
     }
 
-    let mut interval = secs / 60.0;
-    for (divisor, single, plural) in THRESHOLDS {
+    let mut interval: UBig = secs / 60;
+    for (divisor, single, plural) in thresholds {
         if interval < *divisor {
-            let rounded = interval.round() as u64;
-            return format!("{} {}", rounded, if rounded == 1 { single } else { plural });
+            return format!(
+                "{} {}",
+                interval,
+                if interval == UBig::from(1u32) {
+                    single
+                } else {
+                    plural
+                }
+            );
         }
-        interval /= *divisor;
+        interval /= divisor;
     }
 
     "trillions of years".to_string()
@@ -157,7 +168,7 @@ struct Opt {
     bits: f64,
 
     /// Password length (overrides bits target)
-    #[arg(short, long, value_parser = clap::value_parser!(u32).range(1..))]
+    #[arg(short, long, value_parser = clap::value_parser!(u32).range(1..65535))]
     length: Option<u32>,
 
     /// External dictionary, line-separated
@@ -247,8 +258,8 @@ fn main() -> Result<()> {
         .unwrap_or((opts.bits / (dict.len() as f64).log2()).ceil() as u32);
 
     if opts.verbose {
-        let combinations = (dict.len() as f64).powf(f64::from(length));
-        let entropy = combinations.log2();
+        let combinations = UBig::from(dict.len()).pow(length as usize);
+        let entropy = (dict.len() as f64).log2() * length as f64;
         eprintln!(
             "# {:>12}: {}^{} = {:.0}",
             "Combinations",
@@ -264,7 +275,7 @@ fn main() -> Result<()> {
         );
         eprintln!("#");
         eprintln!("# Attack time estimate:");
-        for (attack, duration) in crack_times(combinations) {
+        for (attack, duration) in crack_times(&combinations) {
             eprintln!("# {:>28}: {}", attack, human_duration(duration));
         }
         eprintln!("#");

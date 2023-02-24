@@ -10,6 +10,7 @@ lazy_static = "1.4"
 clap = { version = "4.1.6", features = ["derive", "wrap_help"] }
 eyre = "0.6.8"
 read-restrict = "0.3.0"
+ibig = { version = "0.3.6", default-features = false, features = ["num-traits", "std"] }
 
 [profile.release]
 lto = "fat"
