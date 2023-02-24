@@ -225,7 +225,11 @@ fn main() -> Result<()> {
 
         if opts.verbose {
             eprintln!("# {:>12}: {}", "Dictionary", opts.dictionary);
-            eprintln!("# {:>12}: {}", "Description", d.description.replace('\n', ""));
+            eprintln!(
+                "# {:>12}: {}",
+                "Description",
+                d.description.replace('\n', "")
+            );
         }
     }
 
