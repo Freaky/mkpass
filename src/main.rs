@@ -238,6 +238,11 @@ fn main() -> Result<()> {
     let dict: Vec<&str>;
     let mut separator = " ";
 
+    if opts.list_dictionaries {
+        list_dictionaries();
+        return Ok(());
+    }
+
     if let Some(wl) = opts.file {
         wordlist = read_to_string(&wl, 1024 * 1024 * 128)
             .wrap_err_with(|| format!("Failed to read word list from {}", &wl.display()))?;
@@ -253,6 +258,10 @@ fn main() -> Result<()> {
             dict.len() > 2,
             eyre!("{}: dictionary too short", &wl.display())
         );
+
+        if opts.verbose {
+            eprintln!("# Dictionary: {}", wl.display());
+        }
     } else {
         let d = DICTIONARIES
             .iter()
@@ -260,15 +269,15 @@ fn main() -> Result<()> {
             .expect("Can't find dictionary");
         dict = d.data.lines().collect();
         separator = d.separator;
+
+        if opts.verbose {
+            eprintln!("# Dictionary:\t{}", opts.dictionary);
+            eprintln!("# Description:\t{}", d.description.replace('\n', ""));
+        }
     }
 
     if let Some(ref s) = opts.separator {
         separator = s;
-    }
-
-    if opts.list_dictionaries {
-        list_dictionaries();
-        return Ok(());
     }
 
     let length = opts
