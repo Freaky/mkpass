@@ -113,70 +113,35 @@ fn password_strength(entropy: u32) -> &'static str {
 }
 
 fn human_duration(secs: f64) -> String {
-    fn plural(number: u64) -> &'static str {
-        if number == 1 {
-            ""
-        } else {
-            "s"
-        }
-    }
-
-    const HOUR: f64 = 3600.0;
-    const DAY: f64 = HOUR * 24.0;
-    const MONTH: f64 = DAY * 30.437;
-    const YEAR: f64 = MONTH * 12.0;
-    const DECADE: f64 = YEAR * 10.0;
-    const CENTURY: f64 = YEAR * 100.0;
-    const MILLENNIUM: f64 = YEAR * 1000.0;
-    const MILLION_YEARS: f64 = YEAR * 1_000_000.0;
-    const BILLION_YEARS: f64 = YEAR * 1_000_000_000.0;
-    const TRILLION_YEARS: f64 = YEAR * 1_000_000_000_000.0;
+    const THRESHOLDS: &[(f64, &str, &str)] = &[
+        (60.0, "minute", "minutes"),
+        (24.0, "hour", "hours"),
+        (30.437, "day", "days"),
+        (12.0, "month", "months"),
+        (10.0, "year", "years"),
+        (10.0, "decade", "decades"),
+        (10.0, "century", "centuries"),
+        (1000.0, "millennium", "minnennia"),
+        (1000.0, "million year", "million years"),
+        (1000.0, "billion year", "billion years"),
+    ];
 
     if secs < 1.0 {
-        "less than a second".to_string()
+        return "less than a second".to_string();
     } else if secs < 60.0 {
-        "less than a minute".to_string()
-    } else if secs < HOUR {
-        let base = (secs / 60.0).round() as u64;
-        format!("{} minute{}", base, plural(base))
-    } else if secs < DAY {
-        let base = (secs / HOUR).round() as u64;
-        format!("{} hour{}", base, plural(base))
-    } else if secs < MONTH {
-        let base = (secs / HOUR).round() as u64;
-        format!("{} day{}", base, plural(base))
-    } else if secs < YEAR {
-        let base = (secs / MONTH).round() as u64;
-        format!("{} month{}", base, plural(base))
-    } else if secs < DECADE {
-        let base = (secs / YEAR).round() as u64;
-        format!("{} year{}", base, plural(base))
-    } else if secs < CENTURY {
-        let base = (secs / DECADE).round() as u64;
-        format!("{} decade{}", base, plural(base))
-    } else if secs < MILLENNIUM {
-        let base = (secs / CENTURY).round() as u64;
-        format!(
-            "{} {}",
-            base,
-            if base == 1 { "century" } else { "centuries" }
-        )
-    } else if secs < MILLION_YEARS {
-        let base = (secs / MILLENNIUM).round() as u64;
-        format!(
-            "{} {}",
-            base,
-            if base == 1 { "millennium" } else { "millennia" }
-        )
-    } else if secs < BILLION_YEARS {
-        let base = (secs / MILLION_YEARS).round() as u64;
-        format!("{} million year{}", base, plural(base))
-    } else if secs < TRILLION_YEARS {
-        let base = (secs / BILLION_YEARS).round() as u64;
-        format!("{} billion year{}", base, plural(base))
-    } else {
-        "trillions of years".to_string()
+        return "less than a minute".to_string();
     }
+
+    let mut interval = secs / 60.0;
+    for (divisor, single, plural) in THRESHOLDS {
+        if interval < *divisor {
+            let rounded = interval.round() as u64;
+            return format!("{} {}", rounded, if rounded == 1 { single } else { plural });
+        }
+        interval /= *divisor;
+    }
+
+    "trillions of years".to_string()
 }
 
 #[derive(Debug, Parser)]
