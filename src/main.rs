@@ -225,7 +225,7 @@ fn main() -> Result<()> {
         );
 
         if opts.verbose {
-            eprintln!("# Dictionary: {}", wl.display());
+            eprintln!("# {:>12}: {}", "Dictionary", wl.display());
         }
     } else {
         let d = DICTIONARIES
@@ -236,8 +236,8 @@ fn main() -> Result<()> {
         separator = d.separator;
 
         if opts.verbose {
-            eprintln!("# Dictionary:\t{}", opts.dictionary);
-            eprintln!("# Description:\t{}", d.description.replace('\n', ""));
+            eprintln!("# {:>12}: {}", "Dictionary", opts.dictionary);
+            eprintln!("# {:>12}: {}", "Description", d.description.replace('\n', ""));
         }
     }
 
@@ -254,33 +254,41 @@ fn main() -> Result<()> {
         let entropy = combinations.log2();
         let crack_time = CrackTime::from_combinations(combinations);
         eprintln!(
-            "# Combinations:\t{}^{} = {:.0}",
+            "# {:>12}: {}^{} = {:.0}",
+            "Combinations",
             dict.len(),
             length,
             combinations,
         );
         eprintln!(
-            "# Entropy:\t{:.2} bits ({})",
+            "# {:>12}: {:.2} bits ({})",
+            "Entropy",
             entropy,
             password_strength(entropy as u32)
         );
-        eprintln!("#\n# Attack time estimate:");
+        eprintln!("#");
+        eprintln!("# Attack time estimate:");
         eprintln!(
-            "# Online, unthrottled (10/sec):\t{}",
+            "# {:>30}: {}",
+            "Online, unthrottled (10/s)",
             human_duration(crack_time.online)
         );
         eprintln!(
-            "# Online, throttled (100/hour):\t{}",
+            "# {:>30}: {}",
+            "Online, throttled (100/h)",
             human_duration(crack_time.online_throttled)
         );
         eprintln!(
-            "# Offline, fast (1e10/sec):\t{}",
+            "# {:>30}: {}",
+            "Offline, fast (1e10/s)",
             human_duration(crack_time.offline_fast)
         );
         eprintln!(
-            "# Offline, slow (1e4/sec):\t{}",
+            "# {:>30}: {}",
+            "Offline, slow (1e4/s)",
             human_duration(crack_time.offline_slow)
         );
+        eprintln!("#");
     }
 
     let mut random_words = Uniform::from(0..dict.len())
