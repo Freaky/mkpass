@@ -110,7 +110,7 @@ fn human_duration(secs: f64) -> String {
         (10.0, "year", "years"),
         (10.0, "decade", "decades"),
         (10.0, "century", "centuries"),
-        (1000.0, "millennium", "minnennia"),
+        (1000.0, "millennium", "millennia"),
         (1000.0, "million year", "million years"),
         (1000.0, "billion year", "billion years"),
     ];
