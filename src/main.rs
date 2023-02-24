@@ -51,7 +51,7 @@ const DICTIONARIES: &[PassFormat] = defdicts! {
     "pin"               + ""  = "Numeric"
     "hex"               + ""  = "Hexadecimal"
     "printable"         + ""  = "Mixed-case a-z 0-9 plus standard ASCII symbols"
-    "koremutake"        + "." = "A \"way to express any large number as a sequence of syllables\"\n  https://shorl.com/koremutake.php"
+    "koremutake"        + " " = "A \"way to express any large number as a sequence of syllables\"\n  https://shorl.com/koremutake.php"
 };
 
 #[test]
