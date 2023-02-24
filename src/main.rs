@@ -7,11 +7,20 @@ use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
 use read_restrict::read_to_string;
 
+#[derive(Debug)]
 struct PassFormat {
     name: &'static str,
     data: &'static str,
     separator: &'static str,
     description: &'static str,
+}
+
+#[derive(Default, Debug)]
+struct CrackTime {
+    online: f64,
+    online_throttled: f64,
+    offline_fast: f64,
+    offline_slow: f64,
 }
 
 macro_rules! defdicts {
@@ -68,6 +77,105 @@ fn test_dictionaries() {
             "duplicate entry in {}",
             dict.name
         );
+    }
+}
+
+impl CrackTime {
+    fn from_combinations(combinations: f64) -> Self {
+        // You have better than even odds after exhausting half the options
+        let combinations = combinations / 2.0;
+
+        Self {
+            online: combinations / 10.0,
+            online_throttled: combinations / (10.0 / 3600.0),
+            offline_fast: combinations / 1e10,
+            offline_slow: combinations / 1e4,
+        }
+    }
+}
+
+fn password_strength(entropy: u32) -> &'static str {
+    const THRESHOLDS: &[(u32, &str)] = &[
+        (29, "very weak"),
+        (36, "weak"),
+        (49, "somewhat weak"),
+        (60, "reasonable"),
+        (70, "strong"),
+        (127, "very strong"),
+        (256, "cryptographic"),
+    ];
+
+    THRESHOLDS
+        .iter()
+        .find(|(thresh, _)| entropy < *thresh)
+        .map(|(_, desc)| *desc)
+        .unwrap_or("overkill")
+}
+
+fn human_duration(secs: f64) -> String {
+    fn plural(number: u64) -> &'static str {
+        if number == 1 {
+            ""
+        } else {
+            "s"
+        }
+    }
+
+    const HOUR: f64 = 3600.0;
+    const DAY: f64 = HOUR * 24.0;
+    const MONTH: f64 = DAY * 30.437;
+    const YEAR: f64 = MONTH * 12.0;
+    const DECADE: f64 = YEAR * 10.0;
+    const CENTURY: f64 = YEAR * 100.0;
+    const MILLENNIUM: f64 = YEAR * 1000.0;
+    const MILLION_YEARS: f64 = YEAR * 1_000_000.0;
+    const BILLION_YEARS: f64 = YEAR * 1_000_000_000.0;
+    const TRILLION_YEARS: f64 = YEAR * 1_000_000_000_000.0;
+
+    if secs < 1.0 {
+        "less than a second".to_string()
+    } else if secs < 60.0 {
+        "less than a minute".to_string()
+    } else if secs < HOUR {
+        let base = (secs / 60.0).round() as u64;
+        format!("{} minute{}", base, plural(base))
+    } else if secs < DAY {
+        let base = (secs / HOUR).round() as u64;
+        format!("{} hour{}", base, plural(base))
+    } else if secs < MONTH {
+        let base = (secs / HOUR).round() as u64;
+        format!("{} day{}", base, plural(base))
+    } else if secs < YEAR {
+        let base = (secs / MONTH).round() as u64;
+        format!("{} month{}", base, plural(base))
+    } else if secs < DECADE {
+        let base = (secs / YEAR).round() as u64;
+        format!("{} year{}", base, plural(base))
+    } else if secs < CENTURY {
+        let base = (secs / DECADE).round() as u64;
+        format!("{} decade{}", base, plural(base))
+    } else if secs < MILLENNIUM {
+        let base = (secs / CENTURY).round() as u64;
+        format!(
+            "{} {}",
+            base,
+            if base == 1 { "century" } else { "centuries" }
+        )
+    } else if secs < MILLION_YEARS {
+        let base = (secs / MILLENNIUM).round() as u64;
+        format!(
+            "{} {}",
+            base,
+            if base == 1 { "millennium" } else { "millennia" }
+        )
+    } else if secs < BILLION_YEARS {
+        let base = (secs / MILLION_YEARS).round() as u64;
+        format!("{} million year{}", base, plural(base))
+    } else if secs < TRILLION_YEARS {
+        let base = (secs / BILLION_YEARS).round() as u64;
+        format!("{} billion year{}", base, plural(base))
+    } else {
+        "trillions of years".to_string()
     }
 }
 
@@ -169,12 +277,35 @@ fn main() -> Result<()> {
 
     if opts.verbose {
         let combinations = (dict.len() as f64).powf(f64::from(length));
+        let entropy = combinations.log2();
+        let crack_time = CrackTime::from_combinations(combinations);
         println!(
-            "# Complexity {}^{}={:.0}, {:.2} bits of entropy",
+            "# Combinations:\t{}^{} = {:.0}",
             dict.len(),
             length,
             combinations,
-            combinations.log2()
+        );
+        println!(
+            "# Entropy:\t{:.2} bits ({})",
+            entropy,
+            password_strength(entropy as u32)
+        );
+        println!("#\n# Attack time estimate:");
+        println!(
+            "# Online, unthrottled (10/sec):\t{}",
+            human_duration(crack_time.online)
+        );
+        println!(
+            "# Online, throttled (100/hour):\t{}",
+            human_duration(crack_time.online_throttled)
+        );
+        println!(
+            "# Offline, fast (1e10/sec):\t{}",
+            human_duration(crack_time.offline_fast)
+        );
+        println!(
+            "# Offline, slow (1e4/sec):\t{}",
+            human_duration(crack_time.offline_slow)
         );
     }
 
