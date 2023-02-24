@@ -133,8 +133,12 @@ fn human_duration(secs: f64) -> String {
     "trillions of years".to_string()
 }
 
+/// Generate reasonably secure passwords.
+///
+/// Uses the OS standard cryptographic random number generator to generate
+/// passwords without human bias.
 #[derive(Debug, Parser)]
-#[command(author, version, about = "Generate reasonably secure passwords")]
+#[command(author, version)]
 struct Opt {
     /// Activate verbose mode
     #[arg(short, long)]
