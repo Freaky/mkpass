@@ -14,31 +14,57 @@ Bundled wordlists include:
 
 Passwords are selected using the OS random number generator (`/dev/urandom`,
 `getrandom()`, `getentropy()`, `RtlGenRandom`, etc) via Rust's
-rand::[OsRng][osrng] and sampled using its
+rand::[OsRng][osrng] (using [getrandom]) and sampled with its
 [uniform distribution][uniform] API.
 
 ```
 -% mkpass --help
-mkpass 0.2.0
-Thomas Hurst <tom@hur.st>
-Generate reasonably secure passwords
+Generate reasonably secure passwords.
 
-USAGE:
-    mkpass [FLAGS] [OPTIONS]
+Uses the OS standard cryptographic random number generator to generate passwords
+without human bias.
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-    -v, --verbose    Activate verbose mode
+Usage: mkpass [OPTIONS]
 
-OPTIONS:
-    -b, --bits <bits>              Password strength target, 2^n [default: 72]
-    -d, --dictionary <dict>        Built-in dictionary [default: eff]  [possible values: eff, diceware, beale, alpha,
-                                   mixedalpha, mixedalphanumeric, alphanumeric, pin, hex, printable, koremutake]
-    -l, --length <length>          Password length (overrides bits target)
-    -n, --number <number>          Number of passwords to generate [default: 1]
-    -s, --separator <separator>    Word separator
-    -w, --wordlist <wordlist>      External dictionary
+Options:
+  -v, --verbose
+          Activate verbose mode
+
+  -s, --separator <SEPARATOR>
+          Word separator
+
+  -n, --number <NUMBER>
+          Number of passwords to generate
+
+          [default: 1]
+
+  -b, --bits <BITS>
+          Password strength target, 2^n
+
+          [default: 72]
+
+  -l, --length <LENGTH>
+          Password length (overrides bits target)
+
+  -f, --file <PATH>
+          External dictionary, line-separated
+
+  -d, --dictionary <DICTIONARY>
+          Built-in dictionary
+
+          [default: eff]
+          [possible values: eff, eff-short1, eff-short2, diceware, beale, alpha,
+          mixedalpha, mixedalphanumeric, alphanumeric, pin, hex, printable,
+          koremutake]
+
+  -D, --list-dictionaries
+          Describe built-in dictionaries
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 ```
 
 ## Examples
@@ -46,17 +72,28 @@ OPTIONS:
 ```
 # generate 5 passwords in verbose mode
 -% mkpass -n 5 -v
-# Complexity 7776^6=221073919720733357899776, 77.55 bits of entropy
-carry pang flashing blouse mold antidote
-blustery shrimp gag squire epidural zoology
-mortuary banker roulette unplanned reproduce almost
-tummy retake denial last superhero stifling
-retiree diaper demystify igloo poem helmet
+#   Dictionary: eff
+#  Description: EFF Long Wordlist  https://www.eff.org/dice
+# Combinations: 7776^6 = 221073919720733357899776
+#      Entropy: 77.55 bits (very strong)
+#
+# Attack time estimate:
+#   Online, unthrottled (10/s): trillions of years
+#    Online, throttled (100/h): trillions of years
+#        Offline, slow (1e4/s): 701 billion years
+#       Offline, fast (1e10/s): 701 minnennia
+#    Offline, extreme (1e12/s): 7 minnennia
+#
+skyline skimming vacant removable reunion critter
+sudden ungloved footsie spectrum vision sixtieth
+data husband wobbling enroll ultra pacifier
+clay glamorous unnamed blast jockey astrology
+shakily sprint crafty mortuary kept nanometer
 ```
 
 ```
 # generate a 128-bit passphrase from the system dictionary
--% mkpass -w /usr/share/dict/words -b 128
+-% mkpass -f /usr/share/dict/words -b 128
 cleruchy fructose pierine catchpole espathate refigure kinbote nonpreformed
 ```
 
@@ -71,3 +108,4 @@ fri-vo-pu-tu-va-fre-fo-tre-dry-dri-ba
 [kore]: http://shorl.com/koremutake.php
 [osrng]: https://docs.rs/rand/0.7.0/rand/rngs/struct.OsRng.html
 [uniform]: https://docs.rs/rand/0.7.0/rand/distributions/struct.Uniform.html
+[getrandom]: https://crates.io/crates/getrandom
