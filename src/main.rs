@@ -279,31 +279,31 @@ fn main() -> Result<()> {
         let combinations = (dict.len() as f64).powf(f64::from(length));
         let entropy = combinations.log2();
         let crack_time = CrackTime::from_combinations(combinations);
-        println!(
+        eprintln!(
             "# Combinations:\t{}^{} = {:.0}",
             dict.len(),
             length,
             combinations,
         );
-        println!(
+        eprintln!(
             "# Entropy:\t{:.2} bits ({})",
             entropy,
             password_strength(entropy as u32)
         );
-        println!("#\n# Attack time estimate:");
-        println!(
+        eprintln!("#\n# Attack time estimate:");
+        eprintln!(
             "# Online, unthrottled (10/sec):\t{}",
             human_duration(crack_time.online)
         );
-        println!(
+        eprintln!(
             "# Online, throttled (100/hour):\t{}",
             human_duration(crack_time.online_throttled)
         );
-        println!(
+        eprintln!(
             "# Offline, fast (1e10/sec):\t{}",
             human_duration(crack_time.offline_fast)
         );
-        println!(
+        eprintln!(
             "# Offline, slow (1e4/sec):\t{}",
             human_duration(crack_time.offline_slow)
         );
