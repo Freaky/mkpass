@@ -170,9 +170,8 @@ struct Opt {
         short_alias = 'n',
         long,
         default_value = "1",
-        value_parser = clap::value_parser!(u32).range(1..)
     )]
-    number: u32,
+    count: u32,
 
     /// Password strength target, 2^n
     #[arg(short, long, default_value = "72")]
@@ -314,7 +313,7 @@ fn main() -> Result<()> {
         )
     };
 
-    for _ in 0..opts.number {
+    for _ in 0..opts.count {
         let password = random_words
             .by_ref()
             .take(length as usize)
