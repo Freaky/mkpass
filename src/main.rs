@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{builder::PossibleValuesParser, Parser};
 use eyre::{ensure, eyre, Result, WrapErr};
 use ibig::UBig;
 use rand::distributions::{Distribution, Uniform};
@@ -165,7 +165,13 @@ struct Opt {
     separator: Option<String>,
 
     /// Number of passwords to generate
-    #[arg(short, short_alias = 'c', long, default_value = "1", value_parser = clap::value_parser!(u32).range(1..))]
+    #[arg(
+        short,
+        short_alias = 'n',
+        long,
+        default_value = "1",
+        value_parser = clap::value_parser!(u32).range(1..)
+    )]
     number: u32,
 
     /// Password strength target, 2^n
@@ -186,13 +192,12 @@ struct Opt {
         short_alias = 'w',
         long,
         default_value = "eff",
-        value_parser = clap::builder::PossibleValuesParser::new(&DICTIONARIES.iter().map(|s| s.name).collect::<Vec<&str>>())
+        value_parser = PossibleValuesParser::new(DICTIONARIES.iter().map(|s| s.name))
     )]
     dictionary: String,
 
     /// Manually use dice for randomness
     #[arg(
-        short,
         long,
         value_name = "SIDES",
         value_parser = clap::value_parser!(u32).range(2..)
