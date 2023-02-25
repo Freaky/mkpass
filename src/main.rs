@@ -78,15 +78,24 @@ fn test_dictionaries() {
     }
 }
 
-fn crack_times(combinations: &UBig) -> Vec<(&'static str, UBig)> {
+fn crack_times(combinations: &UBig) -> Vec<(&'static str, f64)> {
     vec![
-        ("Online, unthrottled (10/s)", combinations / 10),
-        ("Online, throttled (1/s)", combinations.clone()),
-        ("Offline, slow (1e4/s)", combinations / 1000),
-        ("Offline, fast (1e10/s)", combinations / 10_000_000_000u64),
+        (
+            "Online, unthrottled (10/s)",
+            (combinations / 10u32).to_f64(),
+        ),
+        (
+            "Online, throttled (100/h)",
+            combinations.to_f64() / (100.0 / 3600.0),
+        ),
+        ("Offline, slow (1e4/s)", (combinations / 1000u32).to_f64()),
+        (
+            "Offline, fast (1e10/s)",
+            (combinations / 10_000_000_000u64).to_f64(),
+        ),
         (
             "Offline, extreme (1e12/s)",
-            combinations / 1_000_000_000_000u64,
+            (combinations / 1_000_000_000_000u64).to_f64(),
         ),
     ]
 }
@@ -108,38 +117,31 @@ fn password_strength(entropy: u32) -> &'static str {
         .map_or("overkill", |(_, desc)| *desc)
 }
 
-fn human_duration(secs: UBig) -> String {
-    let thresholds: &[(UBig, &str, &str)] = &[
-        (60u32.into(), "minute", "minutes"),
-        (24u32.into(), "hour", "hours"),
-        (30u32.into(), "day", "days"),
-        (12u32.into(), "month", "months"),
-        (10u32.into(), "year", "years"),
-        (10u32.into(), "decade", "decades"),
-        (10u32.into(), "century", "centuries"),
-        (1000u32.into(), "millennium", "millennia"),
-        (1000u32.into(), "million year", "million years"),
-        (1000u32.into(), "billion year", "billion years"),
+fn human_duration(secs: f64) -> String {
+    let thresholds: &[(f64, &str, &str)] = &[
+        (60.0, "minute", "minutes"),
+        (24.0, "hour", "hours"),
+        (30.437, "day", "days"),
+        (12.0, "month", "months"),
+        (10.0, "year", "years"),
+        (10.0, "decade", "decades"),
+        (10.0, "century", "centuries"),
+        (1000.0, "millennium", "millennia"),
+        (1000.0, "million year", "million years"),
+        (1000.0, "billion year", "billion years"),
     ];
 
-    if secs < 1u32.into() {
+    if secs < 1.0 {
         return "less than a second".to_string();
-    } else if secs < 60u32.into() {
+    } else if secs < 60.0 {
         return "less than a minute".to_string();
     }
 
-    let mut interval: UBig = secs / 60;
+    let mut interval = secs / 60.0;
     for (divisor, single, plural) in thresholds {
         if interval < *divisor {
-            return format!(
-                "{} {}",
-                interval,
-                if interval == UBig::from(1u32) {
-                    single
-                } else {
-                    plural
-                }
-            );
+            let rounded = interval.round() as u64;
+            return format!("{} {}", rounded, if rounded == 1 { single } else { plural });
         }
         interval /= divisor;
     }
