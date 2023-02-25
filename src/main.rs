@@ -200,7 +200,7 @@ struct Opt {
     #[arg(
         long,
         value_name = "SIDES",
-        value_parser = clap::value_parser!(u32).range(2..)
+        value_parser = clap::value_parser!(u32).range(2..145)
     )]
     dice: Option<u32>,
 
