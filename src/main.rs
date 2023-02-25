@@ -149,6 +149,14 @@ fn human_duration(secs: f64) -> String {
     "trillions of years".to_string()
 }
 
+fn parse_target_bits(arg: &str) -> Result<f64, &'static str> {
+    match arg.parse::<f64>() {
+        Ok(f) if f.is_finite() && (1.0..65535.0).contains(&f) => Ok(f),
+        Ok(_) => Err("Not within range 1..65535"),
+        Err(_) => Err("Not a number"),
+    }
+}
+
 /// Generate reasonably secure passwords.
 ///
 /// Uses the OS standard cryptographic random number generator to generate
@@ -165,16 +173,11 @@ struct Opt {
     separator: Option<String>,
 
     /// Number of passwords to generate
-    #[arg(
-        short,
-        short_alias = 'n',
-        long,
-        default_value = "1",
-    )]
+    #[arg(short, short_alias = 'n', long, default_value = "1")]
     count: u32,
 
     /// Password strength target, 2^n
-    #[arg(short, long, default_value = "72")]
+    #[arg(short, long, default_value_t = 72.0, value_parser = parse_target_bits)]
     bits: f64,
 
     /// Password length (overrides bits target)
@@ -182,7 +185,7 @@ struct Opt {
     length: Option<u32>,
 
     /// External dictionary, line-separated
-    #[arg(short, long, value_name = "PATH")]
+    #[arg(short, long, value_name = "PATH", value_parser = clap::value_parser!(PathBuf))]
     file: Option<PathBuf>,
 
     /// Built-in dictionary
