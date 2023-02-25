@@ -271,13 +271,15 @@ fn main() -> Result<()> {
         separator = s;
     }
 
+    let bits_per_word = (dict.len() as f64).log2();
     let length = opts
         .length
-        .unwrap_or((opts.bits / (dict.len() as f64).log2()).ceil() as u32);
+        .unwrap_or((opts.bits / bits_per_word).ceil() as u32)
+        .max(1);
 
     if opts.verbose {
         let combinations = UBig::from(dict.len()).pow(length as usize);
-        let entropy = (dict.len() as f64).log2() * length as f64;
+        let entropy = bits_per_word * length as f64;
         eprintln!(
             "# {:>12}: {}^{} = {:.0}",
             "Combinations",
