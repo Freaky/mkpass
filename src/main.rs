@@ -10,6 +10,9 @@ use rand::distributions::{Distribution, Uniform};
 use rand::rngs::OsRng;
 use read_restrict::read_to_string;
 
+mod dice;
+use dice::DiceRollRandom;
+
 #[derive(Debug)]
 struct PassFormat {
     name: &'static str,
@@ -185,6 +188,15 @@ struct Opt {
     )]
     dictionary: String,
 
+    /// Manually use dice for randomness
+    #[arg(
+        short,
+        long,
+        value_name = "SIDES",
+        value_parser = clap::value_parser!(u32).range(2..)
+    )]
+    dice: Option<u32>,
+
     /// Describe built-in dictionaries
     #[arg(short = 'D', long)]
     list_dictionaries: bool,
@@ -281,9 +293,19 @@ fn main() -> Result<()> {
         eprintln!("#");
     }
 
-    let mut random_words = Uniform::from(0..dict.len())
-        .sample_iter(OsRng)
-        .map(|i| dict[i]);
+    let mut random_words: Box<dyn Iterator<Item = &str>> = if let Some(sides) = opts.dice {
+        eprintln!("WARNING: Dice support is experimental.");
+        let dice = DiceRollRandom::new(sides);
+        Box::new(std::iter::from_fn(move || {
+            Some(dict[dice.gen(dict.len() as u32) as usize])
+        }))
+    } else {
+        Box::new(
+            Uniform::from(0..dict.len())
+                .sample_iter(OsRng)
+                .map(|i| dict[i]),
+        )
+    };
 
     for _ in 0..opts.number {
         let password = random_words
