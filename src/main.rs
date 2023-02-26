@@ -11,7 +11,7 @@ use rand::rngs::OsRng;
 use read_restrict::read_to_string;
 
 mod dice;
-use dice::DiceRollRandom;
+use dice::{CandidateDice, FastDiceRoller};
 
 #[derive(Debug)]
 struct PassFormat {
@@ -296,6 +296,16 @@ fn main() -> Result<()> {
             entropy,
             password_strength(entropy as u32)
         );
+        eprintln!(
+            "# {:>12}: {}",
+            "Dice Rolls",
+            CandidateDice::ordered_for_limit(dict.len() as u32)
+                .into_iter()
+                .take(6)
+                .map(|d| format!("d{}: {:.2}", d.sides, d.average_rolls * length as f32))
+                .collect::<Vec<String>>()
+                .join(", ")
+        );
         eprintln!("#");
         eprintln!("# Attack time estimate:");
         for (attack, duration) in crack_times(&combinations) {
@@ -306,10 +316,8 @@ fn main() -> Result<()> {
 
     let mut random_words: Box<dyn Iterator<Item = &str>> = if let Some(sides) = opts.dice {
         eprintln!("WARNING: Dice support is experimental.");
-        let dice = DiceRollRandom::new(sides);
-        Box::new(std::iter::from_fn(move || {
-            Some(dict[dice.gen(dict.len() as u32) as usize])
-        }))
+        let dice = FastDiceRoller::new(dict.len() as u32 - 1, sides);
+        Box::new(dice.map(|i| dict[i as usize]))
     } else {
         Box::new(
             Uniform::from(0..dict.len())

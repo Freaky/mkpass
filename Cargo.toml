@@ -11,6 +11,7 @@ eyre = "0.6.8"
 read-restrict = "0.3.0"
 ibig = { version = "0.3.6", default-features = false, features = ["num-traits", "std"] }
 rustyline = { version = "11.0.0", default-features = false }
+ordered-float = "3.4.0"
 
 [profile.release]
 lto = "fat"

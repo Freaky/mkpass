@@ -212,6 +212,7 @@ dependencies = [
  "clap",
  "eyre",
  "ibig",
+ "ordered-float",
  "rand",
  "read-restrict",
  "rustyline",
@@ -243,6 +244,15 @@ name = "once_cell"
 version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
+
+[[package]]
+name = "ordered-float"
+version = "3.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d84eb1409416d254e4a9c8fa56cc24701755025b458f0fcd8e59e1f5f40c23bf"
+dependencies = [
+ "num-traits",
+]
 
 [[package]]
 name = "os_str_bytes"
