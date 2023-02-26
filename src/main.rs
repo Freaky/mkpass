@@ -198,13 +198,15 @@ struct Opt {
     )]
     dictionary: String,
 
-    /// Manually use dice for randomness
+    /// Manually use dice for randomness. If multiple arguments are given, the option
+    /// with the fewest average expected rolls will be selected.
     #[arg(
         long,
         value_name = "SIDES",
+        num_args = 1..,
         value_parser = clap::value_parser!(u32).range(2..145)
     )]
-    dice: Option<u32>,
+    dice: Option<Vec<u32>>,
 
     /// Describe built-in dictionaries
     #[arg(short = 'D', long)]
@@ -299,7 +301,7 @@ fn main() -> Result<()> {
         eprintln!(
             "# {:>12}: {}",
             "Dice Rolls",
-            CandidateDice::ordered_for_limit(dict.len() as u32)
+            CandidateDice::ordered_for_limit(dice::COMMON_DICE.iter().copied(), dict.len() as u32)
                 .into_iter()
                 .take(6)
                 .map(|d| format!("d{}: {:.2}", d.sides, d.average_rolls * length as f32))
@@ -316,7 +318,14 @@ fn main() -> Result<()> {
 
     let mut random_words: Box<dyn Iterator<Item = &str>> = if let Some(sides) = opts.dice {
         eprintln!("WARNING: Dice support is experimental.");
-        let dice = FastDiceRoller::new(dict.len() as u32 - 1, sides);
+        let best_dice =
+            CandidateDice::ordered_for_limit(sides.iter().copied(), dict.len() as u32)[0];
+        eprintln!(
+            "Selected dice: d{}, expected rolls: {:.2}",
+            best_dice.sides,
+            best_dice.average_rolls * length as f32
+        );
+        let dice = FastDiceRoller::new(dict.len() as u32 - 1, best_dice.sides);
         Box::new(dice.map(|i| dict[i as usize]))
     } else {
         Box::new(

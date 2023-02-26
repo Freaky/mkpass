@@ -1,4 +1,4 @@
-const COMMON_DICE: &[u32] = &[3, 4, 6, 8, 10, 12, 20, 30, 100];
+pub const COMMON_DICE: &[u32] = &[3, 4, 6, 8, 10, 12, 20, 30, 100];
 
 #[derive(Debug, Copy, Clone)]
 pub struct CandidateDice {
@@ -31,10 +31,8 @@ impl CandidateDice {
         }
     }
 
-    pub fn ordered_for_limit(limit: u32) -> Vec<Self> {
-        let mut options: Vec<Self> = COMMON_DICE
-            .iter()
-            .copied()
+    pub fn ordered_for_limit(sides: impl Iterator<Item = u32>, limit: u32) -> Vec<Self> {
+        let mut options: Vec<Self> = sides
             .map(|sides| Self::from_sides_and_limit(sides, limit))
             .collect();
 
