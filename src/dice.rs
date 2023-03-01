@@ -121,6 +121,7 @@ impl FastDiceRoller {
 
             x *= 2;
             y = y * 2 + (rngv % 2);
+            rngv /= 2;
             next_bit += 1.0;
 
             if x > self.max_inclusive {
