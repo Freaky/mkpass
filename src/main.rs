@@ -159,8 +159,8 @@ fn parse_target_bits(arg: &str) -> Result<f64, &'static str> {
 
 /// Generate reasonably secure passwords.
 ///
-/// Uses the OS standard cryptographic random number generator to generate
-/// passwords without human bias.
+/// Use your operating system's cryptographic random number generator, or any
+/// dice you have lying around, to create secure passwords without human bias.
 #[derive(Debug, Parser)]
 #[command(author, version)]
 struct Opt {
