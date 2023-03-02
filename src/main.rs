@@ -81,12 +81,12 @@ fn test_dictionaries() {
 fn crack_times(combinations: &UBig) -> Vec<(&'static str, f64)> {
     vec![
         (
-            "Online, unthrottled (10/s)",
-            (combinations / 10u32).to_f64(),
-        ),
-        (
             "Online, throttled (100/h)",
             combinations.to_f64() / (100.0 / 3600.0),
+        ),
+        (
+            "Online, unthrottled (10/s)",
+            (combinations / 10u32).to_f64(),
         ),
         ("Offline, slow (1e4/s)", (combinations / 1000u32).to_f64()),
         (
