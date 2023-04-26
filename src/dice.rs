@@ -1,45 +1,6 @@
-pub const COMMON_DICE: &[u32] = &[3, 4, 6, 8, 10, 12, 20, 30, 100];
-
-#[derive(Debug, Copy, Clone)]
-pub struct CandidateDice {
-    pub sides: u32,
-    pub rolls: u32,
-    pub reroll_pct: f32,
-    pub average_rolls: f32,
-}
-
-impl CandidateDice {
-    pub fn from_sides_and_limit(sides: u32, limit: u32) -> Self {
-        let mut rolls = 1;
-        let mut total;
-        loop {
-            total = sides.pow(rolls);
-            if total >= limit {
-                break;
-            }
-            rolls += 1;
-        }
-
-        let overshoot = total - limit;
-        let reroll_pct = overshoot as f32 / total as f32;
-
-        Self {
-            sides,
-            rolls,
-            reroll_pct,
-            average_rolls: rolls as f32 + (rolls as f32 * reroll_pct),
-        }
-    }
-
-    pub fn ordered_for_limit(sides: impl Iterator<Item = u32>, limit: u32) -> Vec<Self> {
-        let mut options: Vec<Self> = sides
-            .map(|sides| Self::from_sides_and_limit(sides, limit))
-            .collect();
-
-        options.sort_by_key(|dice| (ordered_float::OrderedFloat(dice.average_rolls), dice.sides));
-        options
-    }
-}
+use ibig::UBig;
+use rand::distributions::{Distribution, Uniform};
+use rand::rngs::OsRng;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum FastDiceRollerKind {
@@ -47,6 +8,15 @@ enum FastDiceRollerKind {
     Direct,
     PowerOfTwo,
     NonPowerOfTwo,
+}
+
+#[derive(Debug, Clone)]
+pub struct FastDiceRoller {
+    modulus: u32,
+    modulus_bits: f64,
+    max_inclusive: UBig,
+    kind: FastDiceRollerKind,
+    real_dice: bool,
 }
 
 /// A reformulation of Lumbroso's Fast Dice Roller described in 2009's
@@ -58,21 +28,14 @@ enum FastDiceRollerKind {
 ///
 /// This Twitter thread provides some further insight into the algorithm:
 /// https://twitter.com/gro_tsen/status/1386448258176884737
-pub struct FastDiceRoller {
-    modulus: u32,
-    modulus_bits: f64,
-    max_inclusive: u32,
-    kind: FastDiceRollerKind,
-}
-
 impl FastDiceRoller {
     /// Generate values from 0..=max_inclusive from a uniform random source 0..modulus
-    pub fn new(max_inclusive: u32, modulus: u32) -> Self {
+    pub fn new(max_inclusive: UBig, modulus: u32, real_dice: bool) -> Self {
         let modulus_bits = (modulus as f64).log2();
 
-        let kind = if max_inclusive == 0 {
+        let kind = if max_inclusive == UBig::from(0u32) {
             FastDiceRollerKind::Zero
-        } else if max_inclusive == modulus - 1 {
+        } else if max_inclusive == (modulus - 1).into() {
             FastDiceRollerKind::Direct
         } else if modulus_bits.floor() == modulus_bits {
             FastDiceRollerKind::PowerOfTwo
@@ -85,10 +48,19 @@ impl FastDiceRoller {
             modulus_bits,
             max_inclusive,
             kind,
+            real_dice,
         }
     }
 
     fn read_dice(&self) -> u32 {
+        if self.real_dice {
+            self.read_real_dice()
+        } else {
+            Uniform::from(0..self.modulus).sample(&mut OsRng)
+        }
+    }
+
+    fn read_real_dice(&self) -> u32 {
         let mut rl = rustyline::DefaultEditor::new().unwrap();
         let prompt = format!("Enter a dice roll, 1-{}: ", self.modulus);
         loop {
@@ -107,9 +79,9 @@ impl FastDiceRoller {
         }
     }
 
-    fn power_of_two(&self) -> u32 {
-        let mut x = 1;
-        let mut y = 0;
+    fn power_of_two(&self) -> UBig {
+        let mut x = UBig::from(1u32);
+        let mut y = UBig::from(0u32);
         let mut next_bit = self.modulus_bits;
         let mut rngv = 0;
 
@@ -128,18 +100,18 @@ impl FastDiceRoller {
                 if y <= self.max_inclusive {
                     return y;
                 }
-                x = x - self.max_inclusive - 1;
-                y = y - self.max_inclusive - 1;
+                x = x - &self.max_inclusive - 1;
+                y = y - &self.max_inclusive - 1;
             }
         }
     }
 
-    fn non_power_of_two(&self) -> u32 {
-        if self.max_inclusive < self.modulus {
-            let n_plus_one = self.max_inclusive + 1;
-            let max_exc = ((self.modulus - 1) / n_plus_one) * n_plus_one;
+    fn non_power_of_two(&self) -> UBig {
+        if self.max_inclusive < UBig::from(self.modulus) {
+            let n_plus_one = &self.max_inclusive + 1;
+            let max_exc = ((UBig::from(self.modulus - 1)) / &n_plus_one) * &n_plus_one;
             loop {
-                let ret = self.read_dice();
+                let ret = UBig::from(self.read_dice());
                 if ret < n_plus_one {
                     return ret;
                 }
@@ -148,14 +120,13 @@ impl FastDiceRoller {
                 }
             }
         } else {
-            let cx = (self.max_inclusive / self.modulus) + 1;
-            let mut cx_roller = FastDiceRoller::new(cx - 1, self.modulus);
+            let cx = (&self.max_inclusive / self.modulus) + 1;
+            let mut cx_roller = FastDiceRoller::new(&cx - 1, self.modulus, self.real_dice);
             loop {
-                let ret = cx * self.read_dice();
-                if let Some(ret) = ret.checked_add(cx_roller.next().unwrap()) {
-                    if ret <= self.max_inclusive {
-                        return ret;
-                    }
+                let mut ret: UBig = &cx * self.read_dice();
+                ret += cx_roller.next().unwrap();
+                if ret <= self.max_inclusive {
+                    return ret;
                 }
             }
         }
@@ -163,12 +134,12 @@ impl FastDiceRoller {
 }
 
 impl Iterator for FastDiceRoller {
-    type Item = u32;
+    type Item = UBig;
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(match self.kind {
-            FastDiceRollerKind::Zero => 0,
-            FastDiceRollerKind::Direct => self.read_dice(),
+            FastDiceRollerKind::Zero => UBig::from(0u32),
+            FastDiceRollerKind::Direct => UBig::from(self.read_dice()),
             FastDiceRollerKind::PowerOfTwo => self.power_of_two(),
             FastDiceRollerKind::NonPowerOfTwo => self.non_power_of_two(),
         })

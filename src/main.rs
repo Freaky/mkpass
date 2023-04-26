@@ -11,7 +11,7 @@ use rand::rngs::OsRng;
 use read_restrict::read_to_string;
 
 mod dice;
-use dice::{CandidateDice, FastDiceRoller};
+use dice::FastDiceRoller;
 
 #[derive(Debug)]
 struct PassFormat {
@@ -198,15 +198,13 @@ struct Opt {
     )]
     dictionary: String,
 
-    /// Manually use dice for randomness. If multiple arguments are given, the option
-    /// with the fewest average expected rolls will be selected.
+    /// Manually use dice for randomness.
     #[arg(
         long,
         value_name = "SIDES",
-        num_args = 1..,
         value_parser = clap::value_parser!(u32).range(2..145)
     )]
-    dice: Option<Vec<u32>>,
+    dice: Option<u32>,
 
     /// Describe built-in dictionaries
     #[arg(short = 'D', long)]
@@ -298,16 +296,6 @@ fn main() -> Result<()> {
             entropy,
             password_strength(entropy as u32)
         );
-        eprintln!(
-            "# {:>12}: {}",
-            "Dice Rolls",
-            CandidateDice::ordered_for_limit(dice::COMMON_DICE.iter().copied(), dict.len() as u32)
-                .into_iter()
-                .take(6)
-                .map(|d| format!("d{}: {:.2}", d.sides, d.average_rolls * length as f32))
-                .collect::<Vec<String>>()
-                .join(", ")
-        );
         eprintln!("#");
         eprintln!("# Attack time estimate:");
         for (attack, duration) in crack_times(&combinations) {
@@ -318,15 +306,19 @@ fn main() -> Result<()> {
 
     let mut random_words: Box<dyn Iterator<Item = &str>> = if let Some(sides) = opts.dice {
         eprintln!("WARNING: Dice support is experimental.");
-        let best_dice =
-            CandidateDice::ordered_for_limit(sides.iter().copied(), dict.len() as u32)[0];
-        eprintln!(
-            "Selected dice: d{}, expected rolls: {:.2}",
-            best_dice.sides,
-            best_dice.average_rolls * length as f32
-        );
-        let dice = FastDiceRoller::new(dict.len() as u32 - 1, best_dice.sides);
-        Box::new(dice.map(|i| dict[i as usize]))
+        let dice =
+            FastDiceRoller::new(UBig::from(dict.len()).pow(length as usize) - 1, sides, true);
+        Box::new(dice.flat_map(|roll| {
+            let dict = &dict;
+            (0..length).rev().map(move |i| {
+                let idx = if i > 0 {
+                    (&roll / (UBig::from(dict.len()).pow(i as usize))) % dict.len()
+                } else {
+                    &roll % dict.len()
+                };
+                dict[idx]
+            })
+        }))
     } else {
         Box::new(
             Uniform::from(0..dict.len())

@@ -15,3 +15,6 @@ ordered-float = "3.4.0"
 
 [profile.release]
 lto = "fat"
+
+[profile.test]
+opt-level = 1
