@@ -78,6 +78,9 @@ Options:
   -D, --list-dictionaries
           Describe built-in dictionaries
 
+      --dump
+          Dump the selected dictionary to stdout and exit
+
   -h, --help
           Print help (see a summary with '-h')
 

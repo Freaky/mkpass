@@ -209,6 +209,10 @@ struct Opt {
     /// Describe built-in dictionaries
     #[arg(short = 'D', long)]
     list_dictionaries: bool,
+
+    /// Dump the selected dictionary to stdout and exit
+    #[arg(long = "dump")]
+    dump: bool,
 }
 
 fn list_dictionaries() {
@@ -268,6 +272,13 @@ fn main() -> Result<()> {
                 d.description.replace('\n', "")
             );
         }
+    }
+
+    if opts.dump {
+        for word in &dict {
+            println!("{}", word);
+        }
+        return Ok(());
     }
 
     if let Some(ref s) = opts.separator {
